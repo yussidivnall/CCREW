@@ -4,12 +4,8 @@ import pandas as pd
 import geopandas as gpd
 import config
 
-data = {
-    "long":[],
-    "lat":[],
-    "text":[],
-    "cnt": []
-}
+data = {"long": [], "lat": [], "text": [], "cnt": []}
+
 
 def plot_map(data):
     arena = {
@@ -17,15 +13,13 @@ def plot_map(data):
         "west": config.arena[0][1][1],
         "south": config.arena[0][1][0],
         "north": config.arena[0][0][0],
-
     }
-
 
     fig = px.scatter_mapbox(
         data,
-        lat = 'lat',
-        lon = 'lon',
-        text = data['name'],
+        lat="lat",
+        lon="lon",
+        text=data["name"],
         zoom=3,
         # height=300,
     )
@@ -34,6 +28,7 @@ def plot_map(data):
     # fig.update_layout(mapbox_bounds={"west": 0.5, "east": 2.3, "south": 50.5, "north": 51.5})
     fig.update_layout(mapbox_bounds=arena)
     return fig
+
 
 # # boats = pd.DataFrame(data=data)
 # boats = pd.read_csv(config.boats_state_file)
@@ -48,10 +43,13 @@ def plot_map(data):
 #         )
 #     )
 
+
 def main():
     boats = pd.read_csv(config.boats_state_file)
     # boats = gpd.read_file(config.boats_state_file)
     map = plot_map(boats)
     map.show()
+
+
 if __name__ == "__main__":
     main()

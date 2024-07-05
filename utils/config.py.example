@@ -7,3 +7,6 @@ update_interval = 30
 
 boats_state_file = "boats.csv"
 planes_state_file = "plane.csv"
+
+boats_log_file = "boats.log.csv"
+aircrafts_log_file = "aircrafts.log.csv"

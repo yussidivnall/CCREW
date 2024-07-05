@@ -103,7 +103,7 @@ def update_state(message):
 
 async def connect_ais_stream():
     api_key = config.api_key
-    arena = [[[51.399, 2.2666], [50.85, 0.639]]]
+    arena = config.arena
     async with websockets.connect("wss://stream.aisstream.io/v0/stream") as websocket:
         subscribe_message = {
             "APIKey": api_key,
