@@ -1,0 +1,34 @@
+{
+  "Message": {
+    "StandardSearchAndRescueAircraftReport": {
+      "AltFromBaro": false,
+      "Altitude": 83,
+      "AssignedMode": false,
+      "Cog": 303.4,
+      "CommunicationState": 2315,
+      "CommunicationStateIsItdma": false,
+      "Dte": true,
+      "Latitude": 50.94049166666667,
+      "Longitude": 0.9656316666666667,
+      "MessageID": 9,
+      "PositionAccuracy": false,
+      "Raim": false,
+      "RepeatIndicator": 0,
+      "Sog": 14,
+      "Spare1": 0,
+      "Spare2": 0,
+      "Timestamp": 30,
+      "UserID": 111232535,
+      "Valid": true
+    }
+  },
+  "MessageType": "StandardSearchAndRescueAircraftReport",
+  "MetaData": {
+    "MMSI": 111232535,
+    "MMSI_String": 111232535,
+    "ShipName": "COASTGUARD          ",
+    "latitude": 50.94049166666667,
+    "longitude": 0.9656316666666667,
+    "time_utc": "2024-07-02 17:42:31.629816375 +0000 UTC"
+  }
+}
