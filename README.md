@@ -3,6 +3,7 @@ These are a set of utilities designed to assist in developing an understanding o
 Our goal is to make every journey non lethal.
 
 These utilities monitors and alerts when potentially dangerous situations occur.
+Tools for a safer passage.
 
 ## Utilities
 
@@ -23,3 +24,11 @@ Post to discord
 
 #### Daily Forecast post
 
+## Usage
+You probably want to be in a python virtual environment!
+
+`pip install -r requirements.txt`
+In one terminal run `python track.py`
+This will generate and update log files files in "data/boats.log.csv" and "data/aircrafts.log.csv".
+Let it run while using the application
+In another start the Dash application, to monitor `python app.py` and browse to http://localhost:8050
