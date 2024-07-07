@@ -1,0 +1,16 @@
+api_key = <AISSTream API Key>
+arena = [[[lat, lon], [lat, lon]]]
+
+# Will ignore update time interval and just record all
+# Will probably create large files
+record_all = False
+
+# Minimum number of seconds before updating a vessel location
+# When logging a boat's position, if at least this time elapsed since last time stamp, update
+update_interval = 15
+
+boats_state_file = "data/boats.state.csv"
+planes_state_file = "data/plane.state.csv"
+
+boats_log_file = "data/boats.log.csv"
+aircrafts_log_file = "data/aircrafts.log.csv"

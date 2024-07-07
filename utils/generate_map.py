@@ -7,12 +7,12 @@ import config
 data = {"long": [], "lat": [], "text": [], "cnt": []}
 
 
-def plot_map(data):
+def plot_map(data, arena):
     arena = {
-        "east": config.arena[0][0][1],
-        "west": config.arena[0][1][1],
-        "south": config.arena[0][1][0],
-        "north": config.arena[0][0][0],
+        "east": arena[0][0][1],
+        "west": arena[0][1][1],
+        "south": arena[0][1][0],
+        "north": arena[0][0][0],
     }
 
     fig = px.scatter_mapbox(
@@ -47,7 +47,7 @@ def plot_map(data):
 def main():
     boats = pd.read_csv(config.boats_state_file)
     # boats = gpd.read_file(config.boats_state_file)
-    map = plot_map(boats)
+    map = plot_map(boats, config.arena)
     map.show()
 
 

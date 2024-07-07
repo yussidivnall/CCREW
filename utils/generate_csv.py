@@ -6,6 +6,7 @@ import websockets
 import config
 import csv
 import parsers
+from pathlib import Path
 
 # from pathlib import Path
 
@@ -43,28 +44,17 @@ def save_state(csvfile: str, state: dict):
 
 
 def append_to_log(logfile: str, entry):
-    print(entry.values())
     headers = entry.keys()
-    with open(logfile, mode="a", newline="") as f:
-        writer = csv.DictWriter(f, headers)
-        writer.writeheader()
-        writer.writerow(entry.values())
-
-    #    if Path(logfile).is_file():
-    #        with open(logfile, mode="a", newline="") as f:
-    #            writer = csv.DictWriter(f, headers)
-    #            writer.writeheader()
-    #            writer.writerows(entry.values())
-    #    else:
-    #        # Doesn't exits, create
-    #        first_key = next(iter(entry))
-    #        headers = state[first_key].keys()
-    #        pass
-    #        with open(logfile, mode="a", newline="") as f:
-    #            writer = csv.DictWriter(f, headers)
-    #            writer.writeheader()
-    #            writer.writerows(entry.values())
-    #    pass
+    if Path(logfile).is_file():
+        with open(logfile, mode="a", newline="") as f:
+            writer = csv.DictWriter(f, headers)
+            writer.writerow(entry)
+    else:
+        # Doesn't exits, create
+        with open(logfile, mode="a", newline="") as f:
+            writer = csv.DictWriter(f, headers)
+            writer.writeheader()
+            writer.writerow(entry)
 
 
 def update_state(message):
