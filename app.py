@@ -72,9 +72,15 @@ def draw():
 
     latest_boat_positions_df = processing.latest_states(boats_df)
     tracked_boats_df = processing.tracked_vessels(boats_df, config.tracked_boats)
+    traces = plotting.get_tracked_traces(tracked_boats_df, config.tracked_boats)
 
     fig: Figure = plotting.plot_map(latest_boat_positions_df, arena=config.arena)
     fig.update_layout(uirevision=True)
+    fig.update_layout(transition_duration=500)
+
+    for trace in traces:
+        fig.add_trace(trace)
+
     return fig
 
 
@@ -83,7 +89,6 @@ def update(value):
     print(value)
     print("Updating")
     fig = draw()
-    fig.update_layout(transition_duration=500)
     return fig
 
 

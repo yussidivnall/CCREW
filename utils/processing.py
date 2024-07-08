@@ -2,7 +2,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 
-def tail_log(df, rows=-1000, oldest=600):
+def tail_log(df, rows=-10000, oldest=600):
     """returns N rows from end of dataframe, filter out  entries older then oldest seconds"""
     df = df.iloc[rows:]
     timeout = datetime.now() - timedelta(seconds=oldest)
@@ -27,6 +27,12 @@ def latest_states(vessels: pd.DataFrame) -> pd.DataFrame:
 
 
 def tracked_vessels(vessels: pd.DataFrame, tracking_vessels: list) -> pd.DataFrame:
+    """Return a dataframe with only tracked vessels present in tracking_vessels
 
-    print(tracking_vessels)
-    return vessels
+    trackiong vessels probably comes from config and looks like this
+    [{"mmsi":123, "label": "Label To Apply To Boat", "name": "Anything, not really used for nothing"}, ...]
+    """
+    mmsis = [vessel["mmsi"] for vessel in tracking_vessels]
+    mask = vessels["mmsi"].isin(mmsis)
+    ret = vessels.loc[mask].copy()
+    return ret

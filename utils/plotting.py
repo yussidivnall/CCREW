@@ -1,5 +1,25 @@
+import pandas as pd
 import plotly.express as px
-from plotly.graph_objects import Figure
+from plotly.graph_objects import Figure, Scattergeo
+
+
+def get_tracked_traces(df: pd.DataFrame, tracked: list) -> list:
+    """ """
+    traces = []
+    for vessel in tracked:
+        mmsi = vessel["mmsi"]
+        color = vessel["color"]
+        vessel_df = df[df["mmsi"] == mmsi]
+        trace = Scattergeo(
+            lon=vessel_df["lon"],
+            lat=vessel_df["lat"],
+            mode="lines+markers",
+            line=dict(width=2, color=color),
+            marker=dict(size=6, symbol="circle", color=color),
+            name=str(mmsi),
+        )
+        traces.append(trace)
+    return traces
 
 
 def plot_map(data, arena) -> Figure:
