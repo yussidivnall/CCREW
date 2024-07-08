@@ -3,7 +3,8 @@ from dash import Dash, html, dcc
 from dash import Input, Output
 import pandas as pd
 import plotly.express as px
-from utils import processing
+from plotly.graph_objects import Figure
+from utils import processing, plotting
 import config
 
 
@@ -15,32 +16,6 @@ app.layout = [
         id="update-interval", interval=config.update_interval * 1000, n_intervals=0
     ),
 ]
-
-
-def plot_map(data, arena):
-    arena_bounds = {
-        "east": arena[0][0][1],
-        "west": arena[0][1][1],
-        "south": arena[0][1][0],
-        "north": arena[0][0][0],
-    }
-
-    fig = px.scatter_mapbox(
-        data,
-        lat="lat",
-        lon="lon",
-        text="ship_name",
-        color="color",
-        zoom=3,
-        height=700,
-        width=1400,
-    )
-    fig.update_layout(mapbox_style="open-street-map")
-    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
-    # fig.update_layout(mapbox_bounds={"west": 0.5, "east": 2.3, "south": 50.5, "north": 51.5})
-    fig.update_layout(mapbox_bounds=arena_bounds)
-    fig.update_layout(uirevision=True)
-    return fig
 
 
 def prepare_boats_dataframe(boats: pd.DataFrame) -> pd.DataFrame:
@@ -91,15 +66,15 @@ def load_aircrafts() -> pd.DataFrame:
     return aircrafts_df
 
 
-def latest_states(boats: pd.DataFrame) -> pd.DataFrame:
-    boats = boats.loc[boats.groupby("mmsi")["server_timestamp"].idxmax()]
-    return boats
-
-
 def draw():
     boats_df = load_boats()
-    latest_positions_df = latest_states(boats_df)
-    fig = plot_map(latest_positions_df, arena=config.arena)
+    aircraft_df = load_aircrafts()
+
+    latest_boat_positions_df = processing.latest_states(boats_df)
+    tracked_boats_df = processing.tracked_vessels(boats_df, config.tracked_boats)
+
+    fig: Figure = plotting.plot_map(latest_boat_positions_df, arena=config.arena)
+    fig.update_layout(uirevision=True)
     return fig
 
 
@@ -108,6 +83,7 @@ def update(value):
     print(value)
     print("Updating")
     fig = draw()
+    fig.update_layout(transition_duration=500)
     return fig
 
 

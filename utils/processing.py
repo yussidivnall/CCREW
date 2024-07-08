@@ -18,3 +18,15 @@ def fix_datetime_columns(df: pd.DataFrame, columns=["server_timestamp"]):
         col = pd.to_datetime(col)
         df[column_name] = col
     return df
+
+
+def latest_states(vessels: pd.DataFrame) -> pd.DataFrame:
+    """Returns latest entry of each vessel in dataframe groupped by mmsi"""
+    vessels = vessels.loc[vessels.groupby("mmsi")["server_timestamp"].idxmax()]
+    return vessels
+
+
+def tracked_vessels(vessels: pd.DataFrame, tracking_vessels: list) -> pd.DataFrame:
+
+    print(tracking_vessels)
+    return vessels
