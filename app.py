@@ -70,17 +70,20 @@ def draw():
     boats_df = load_boats()
     aircraft_df = load_aircrafts()
 
-    latest_boat_positions_df = processing.latest_states(boats_df)
+    # latest_boat_positions_df = processing.latest_states(boats_df.copy())
     tracked_boats_df = processing.tracked_vessels(boats_df, config.tracked_boats)
     traces = plotting.get_tracked_traces(tracked_boats_df, config.tracked_boats)
 
-    fig: Figure = plotting.plot_map(latest_boat_positions_df, arena=config.arena)
-    fig.update_layout(uirevision=True)
-    fig.update_layout(transition_duration=500)
+    df = pd.DataFrame(data={"mmsi": 0, "lat": 0, "lon": 0})
+
+    fig: Figure = plotting.plot_map(boats_df, arena=config.arena)
+    # fig: Figure = plotting.plot_map(latest_boat_positions_df, arena=config.arena)
 
     for trace in traces:
         fig.add_trace(trace)
 
+    fig.update_layout(uirevision=True)
+    fig.update_layout(transition_duration=500)
     return fig
 
 

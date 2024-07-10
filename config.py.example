@@ -1,3 +1,10 @@
+# See https://realpython.com/how-to-make-a-discord-bot-python/
+discord_token = (
+    "<DISCORD API TOKEN>"
+)
+# Discord channel for bot to post alerts on
+discord_channel_id = <DISCORD CHANNEL ID>
+# API Key for AIS Stream
 api_key = <AISSTream API Key>
 arena = [[[lat, lon], [lat, lon]]]
 
@@ -9,8 +16,14 @@ record_all = False
 # When logging a boat's position, if at least this time elapsed since last time stamp, update
 update_interval = 15
 
-boats_state_file = "data/boats.state.csv"
-planes_state_file = "data/plane.state.csv"
-
 boats_log_file = "data/boats.log.csv"
 aircrafts_log_file = "data/aircrafts.log.csv"
+
+images_directory = "images/"
+
+tracked_boats = [
+    {
+        "mmsi": 1234,
+        "name": "Boat name",
+    },
+]

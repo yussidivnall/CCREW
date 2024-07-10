@@ -2,7 +2,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 
-def tail_log(df, rows=-10000, oldest=600):
+def tail_log(df, rows=-50000, oldest=1800):
     """returns N rows from end of dataframe, filter out  entries older then oldest seconds"""
     df = df.iloc[rows:]
     timeout = datetime.now() - timedelta(seconds=oldest)
@@ -24,6 +24,13 @@ def latest_states(vessels: pd.DataFrame) -> pd.DataFrame:
     """Returns latest entry of each vessel in dataframe groupped by mmsi"""
     vessels = vessels.loc[vessels.groupby("mmsi")["server_timestamp"].idxmax()]
     return vessels
+
+
+def snapshot(df: pd.DataFrame) -> pd.DataFrame:
+    """Returns latest entry of each vessel in dataframe groupped by mmsi"""
+    ret = df.copy()
+    df = df.loc[df.groupby("mmsi")["server_timestamp"].idxmax()]
+    return df
 
 
 def tracked_vessels(vessels: pd.DataFrame, tracking_vessels: list) -> pd.DataFrame:
