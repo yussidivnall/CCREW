@@ -25,5 +25,14 @@ tracked_boats = [
     {
         "mmsi": 1234,
         "name": "Boat name",
+        "color": "red"
     },
 ]
+# Define regions for alerting
+regions = {
+    "port": {
+        "lat": [],
+        "lon": [],
+        "name": "Port Region",
+    },
+}

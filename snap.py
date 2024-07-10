@@ -1,3 +1,5 @@
+""" Produces a snapshot image of the arena, stores to "images/snap.png" """
+
 import os
 import pandas as pd
 import plotly.graph_objects as go
@@ -24,17 +26,13 @@ def main():
     # fig: Figure = plotting.plot_map(snapshot_df, arena=config.arena)
     fig: Figure = plotting.plot_map(snapshot_df, arena=config.arena)
 
-    # Trying to figure out how to add traces
-    trace = go.Scattermapbox(
-        lon=[1.4, 1.2, 1.6, 1.4], lat=[51.1, 50.95, 51.0, 51.1], fill="toself"
-    )
-    fig.add_trace(trace)
+    port = plotting.get_region_trace(config.regions["port"])
+    fig.add_trace(port)
     print(fig)
 
     tracked_boats_df = processing.tracked_vessels(boats_df, config.tracked_boats)
     traces = plotting.get_tracked_traces(tracked_boats_df, config.tracked_boats)
     for trace in traces:
-        print(trace)
         fig.add_trace(trace)
 
     filename = os.path.join(config.images_directory, "snapshot.png")

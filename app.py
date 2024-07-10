@@ -16,6 +16,7 @@ app.layout = [
         id="update-interval", interval=config.update_interval * 1000, n_intervals=0
     ),
 ]
+fig = None
 
 
 def prepare_boats_dataframe(boats: pd.DataFrame) -> pd.DataFrame:
@@ -70,13 +71,35 @@ def draw():
     boats_df = load_boats()
     aircraft_df = load_aircrafts()
 
+    # latest state of all boats
+    boats_snapshot_df = processing.snapshot(boats_df)
+    aircrafts_snapshot_df = processing.snapshot(aircraft_df)
+
     # latest_boat_positions_df = processing.latest_states(boats_df.copy())
     tracked_boats_df = processing.tracked_vessels(boats_df, config.tracked_boats)
     traces = plotting.get_tracked_traces(tracked_boats_df, config.tracked_boats)
 
-    df = pd.DataFrame(data={"mmsi": 0, "lat": 0, "lon": 0})
+    for trace in traces:
+        fig.add_trace(trace)
 
-    fig: Figure = plotting.plot_map(boats_df, arena=config.arena)
+    fig.update_layout(uirevision=True)
+    fig.update_layout(transition_duration=500)
+    return fig
+
+
+def create_figure():
+    boats_df = load_boats()
+    aircraft_df = load_aircrafts()
+
+    # latest state of all boats
+    boats_snapshot_df = processing.snapshot(boats_df)
+    aircrafts_snapshot_df = processing.snapshot(aircraft_df)
+
+    # latest_boat_positions_df = processing.latest_states(boats_df.copy())
+    tracked_boats_df = processing.tracked_vessels(boats_df, config.tracked_boats)
+    traces = plotting.get_tracked_traces(tracked_boats_df, config.tracked_boats)
+
+    fig: Figure = plotting.plot_map(boats_snapshot_df, arena=config.arena)
     # fig: Figure = plotting.plot_map(latest_boat_positions_df, arena=config.arena)
 
     for trace in traces:
@@ -87,13 +110,28 @@ def draw():
     return fig
 
 
+def update_figure():
+    boats_df = load_boats()
+    aircraft_df = load_aircrafts()
+
+    # latest state of all boats
+    boats_snapshot_df = processing.snapshot(boats_df)
+    aircrafts_snapshot_df = processing.snapshot(aircraft_df)
+
+    # latest tracked
+    tracked_boats_df = processing.tracked_vessels(boats_df, config.tracked_boats)
+    pass
+
+
 @app.callback(Output("map", "figure"), [Input("update-interval", "n_intervals")])
 def update(value):
     print(value)
     print("Updating")
-    fig = draw()
+    # TODO, should update data, not recreate each time
+    fig = create_figure()
     return fig
 
 
 if __name__ == "__main__":
+    fig = create_figure()
     app.run(debug=True, use_reloader=True)

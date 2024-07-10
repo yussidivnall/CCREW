@@ -1,5 +1,7 @@
+from inspect import Arguments
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 from plotly.graph_objects import Figure, Scattergeo, Scattermapbox
 
 
@@ -8,6 +10,7 @@ def get_tracked_traces(df: pd.DataFrame, tracked: list) -> list:
     traces = []
     for vessel in tracked:
         mmsi = vessel["mmsi"]
+        name = vessel["name"]
         # color = vessel["color"]
         # print(color)
         vessel_df = df[df["mmsi"] == mmsi]
@@ -15,15 +18,27 @@ def get_tracked_traces(df: pd.DataFrame, tracked: list) -> list:
             lon=vessel_df["lon"],
             lat=vessel_df["lat"],
             mode="lines+markers",
-            # line=dict(width=2),
-            line=dict(width=2, color="teal"),
+            line=dict(width=2),
+            # line=dict(width=2, color="teal"),
             marker=dict(size=6, symbol="circle"),
-            name=str(mmsi),
+            name=name,
         )
         traces.append(trace)
     return traces
 
-def get_region()
+
+def get_region_trace(region):
+    """get a trace for a single enclosed region
+
+    Arguments:
+        region: a dictionary containing lat, lon points around region and a label, eg { lat:[...], lon:[...], label
+        name: a name of the region
+    Returns: A Scattermapbox
+    """
+    trace = go.Scattermapbox(
+        lon=region["lon"], lat=region["lat"], fill="toself", name=region["name"]
+    )
+    return trace
 
 
 def plot_map(data, arena) -> Figure:
@@ -40,7 +55,8 @@ def plot_map(data, arena) -> Figure:
         lat="lat",
         lon="lon",
         text="ship_name",
-        color="color",
+        title="ship_name",
+        # color="color",
         labels="ship_name",
         zoom=3,
         height=700,
