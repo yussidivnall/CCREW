@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import datetime, timedelta
+import config
 
 
 def tail_log(df, rows=-50000, oldest=1800):
@@ -29,8 +30,8 @@ def latest_states(vessels: pd.DataFrame) -> pd.DataFrame:
 def snapshot(df: pd.DataFrame) -> pd.DataFrame:
     """Returns latest entry of each vessel in dataframe groupped by mmsi"""
     ret = df.copy()
-    df = df.loc[df.groupby("mmsi")["server_timestamp"].idxmax()]
-    return df
+    ret = ret.loc[df.groupby("mmsi")["server_timestamp"].idxmax()]
+    return ret
 
 
 def tracked_vessels(vessels: pd.DataFrame, tracking_vessels: list) -> pd.DataFrame:
@@ -43,3 +44,14 @@ def tracked_vessels(vessels: pd.DataFrame, tracking_vessels: list) -> pd.DataFra
     mask = vessels["mmsi"].isin(mmsis)
     ret = vessels.loc[mask].copy()
     return ret
+
+
+def load_dataframes() -> tuple[pd.DataFrame, pd.DataFrame]:
+    """A helper to load both boat and aircraft log dataframe
+
+    Returns a tuple of both dataframes
+    """
+    boats = pd.read_csv(config.boats_log_file)
+    aircrafts = pd.read_csv(config.aircrafts_log_file)
+
+    return (boats, aircrafts)

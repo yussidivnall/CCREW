@@ -1,41 +1,9 @@
+""" Parses a responst object from AIS Stream into a flat dictionary for CSV """
+
 from datetime import datetime, timedelta
 import pandas as pd
 
 from dtypes import BoatPosition, AircraftPosition
-
-
-# def fix_time(time):
-#     # The Date format is non standard,
-#     # python expects 6 digits in microseconds
-#     # AIS gives 9
-#     time = time[0:26] + " " + time[-9:]
-#     time = time.replace(" ", "T", 1)
-#     ret = datetime.strptime(time, "%Y-%m-%dT%H:%M:%S.%f %z %Z")
-#     return ret
-#
-#
-# def parse_boat_state(message):
-#     boat = {
-#         "mmsi": message["MetaData"]["MMSI"],
-#         "name": message["MetaData"]["ShipName"],
-#         "lon": message["MetaData"]["longitude"],
-#         "lat": message["MetaData"]["latitude"],
-#         "time": fix_time(message["MetaData"]["time_utc"]),
-#         # cog, etc
-#     }
-#     return boat
-#
-#
-# def parse_aircraft_state(message):
-#     plane = {
-#         "mmsi": message["MetaData"]["MMSI"],
-#         "name": message["MetaData"]["ShipName"],
-#         "lon": message["MetaData"]["longitude"],
-#         "lat": message["MetaData"]["latitude"],
-#         "time": fix_time(message["MetaData"]["time_utc"]),
-#         # cog, altitude , etc
-#     }
-#     return plane
 
 
 def parse_position_report(msg) -> BoatPosition:
