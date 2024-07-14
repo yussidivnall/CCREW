@@ -1,5 +1,6 @@
 from numpy.dtypes import DateTime64DType
 import pandas as pd
+from utils import processing
 from utils.processing import tracked_vessels, fix_datetime_columns
 
 
@@ -40,3 +41,12 @@ def test_multiple_tracked_boats():
     df = fix_datetime_columns(df)
     unique_boats = df["mmsi"].unique()
     assert set(unique_boats) == set([235118075, 235103844])
+
+
+def test_snapshot():
+    tracked = [{"mmsi": 235118075}, {"mmsi": 235103844}]
+    df = pd.read_csv("tests/data/boats.log.csv")
+    snapshot = processing.snapshot(df)
+    assert len(snapshot) == 140
+    snapshot = processing.snapshot(df, tracked)
+    assert len(snapshot) == 2

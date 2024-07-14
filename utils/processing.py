@@ -1,6 +1,7 @@
 import pandas as pd
 from datetime import datetime, timedelta
 import config
+from dtypes import BoatPosition, AircraftPosition
 
 
 def tail_log(df, rows=-50000, oldest=1800):
@@ -27,10 +28,12 @@ def latest_states(vessels: pd.DataFrame) -> pd.DataFrame:
     return vessels
 
 
-def snapshot(df: pd.DataFrame) -> pd.DataFrame:
+def snapshot(df: pd.DataFrame, tracked: list | None = None) -> pd.DataFrame:
     """Returns latest entry of each vessel in dataframe groupped by mmsi"""
     ret = df.copy()
     ret = ret.loc[df.groupby("mmsi")["server_timestamp"].idxmax()]
+    if tracked is not None:
+        ret = tracked_vessels(ret, tracked)
     return ret
 
 
@@ -41,6 +44,7 @@ def tracked_vessels(vessels: pd.DataFrame, tracking_vessels: list) -> pd.DataFra
     [{"mmsi":123, "label": "Label To Apply To Boat", "name": "Anything, not really used for nothing"}, ...]
     """
     mmsis = [vessel["mmsi"] for vessel in tracking_vessels]
+    print(mmsis)
     mask = vessels["mmsi"].isin(mmsis)
     ret = vessels.loc[mask].copy()
     return ret

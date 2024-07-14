@@ -1,4 +1,4 @@
-from typing import NotRequired, TypedDict
+from typing import NotRequired, TypedDict, Dict
 from datetime import datetime
 
 
@@ -54,12 +54,17 @@ class AircraftPosition(TypedDict):
 class BoatStatus(TypedDict):
     mmsi: int
     name: str
-    regions: list[str]
+    in_regions: list[str]
     online: bool
     home: NotRequired[bool]
 
 
+class AlertsStatus(TypedDict):
+    monitor: bool
+    boats: Dict[int, BoatStatus]
+
+
 class Region(TypedDict):
-    lon: list[float]
     lat: list[float]
+    lon: list[float]
     name: str
