@@ -56,7 +56,7 @@ class BoatStatus(TypedDict):
     name: str
     in_regions: list[str]
     online: bool
-    home: NotRequired[bool]
+    home: NotRequired[str]
 
 
 class AlertsStatus(TypedDict):

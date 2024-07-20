@@ -1,3 +1,4 @@
+import logging
 import schedule
 import time
 import pandas as pd
@@ -10,8 +11,8 @@ status: AlertsStatus = {"monitor": False, "boats": {}}
 boats_df: pd.DataFrame
 aircrafts_df: pd.DataFrame
 
-boats_snapshot_df: pd.DataFrame
-aircrafts_snapshot_df: pd.DataFrame
+boats_snapshot_df = pd.DataFrame()
+aircrafts_snapshot_df = pd.DataFrame()
 
 
 def reload_dataframes():
@@ -27,38 +28,82 @@ def reload_dataframes():
     aircrafts_snapshot_df = processing.snapshot(aircrafts_df)
 
 
+def dump_status():
+    global status
+    print(json.dumps(status, indent=2))
+
+
+def dispatch_message(message):
+    # Post a message to discord
+    print("LALALA")
+    logging.info(message)
+    print("Message is ", message)
+
+
+def check_aircrafts():
+    global status
+
+
 def update_regions():
     """Updates the regions in the global statuses"""
-    print()
     global boats_snapshot_df, aircrafts_snapshot_df, status
     regions = config.regions
-
+    dispatch_message("Hello")
+    dispatch_message(status)
     for mmsi in status["boats"].keys():
-        boat = boats_snapshot_df[boats_snapshot_df.mmsi == mmsi].iloc[0]
+        dispatch_message(f"Boat {mmsi}")
+        boat_status = status["boats"][mmsi]
+        if "home" in boat_status.keys():
+            home_key = boat_status["home"]
+            home_region = regions[home_key]
+
+        boat_snapshot = boats_snapshot_df[boats_snapshot_df.mmsi == mmsi].iloc[0]
         # lat, lon = boat[["lat", "lon"]]
         for region_key in regions:
-            r = regions[region_key]
-            reg: Region = r
-            in_region = logic.boat_in_region(boat, reg)
-            print(boat["ship_name"])
-            print(in_region)
+            region: Region = regions[region_key]
+            in_region = logic.boat_in_region(boat_snapshot, region)
+            if in_region:
+                # Boat is in region, check is it's in boat_status[region], If it is continue
+                # If not, add to boat_status[regions] and dispatch message "Boat entered _region_.
+                #
+                # and check if it's also the home region
+                # If it's the home region dispatch message "Boat has returned home"
+
+                if region_key in boat_status["in_regions"]:
+                    # Region already in status, do nothing
+                    continue
+                else:
+                    boat_status["in_regions"].append(region_key)
+                    dispatch_message(f"Boat {boat_status['name']} entered {region_key}")
+                pass
+            else:
+                # If boat not in region
+                # Check if region is in boat_status['region'], if so dispatch message "boat has left region"
+                if region_key in boat_status["in_regions"]:
+                    boat_status["in_regions"].remove(region_key)
+                    dispatch_message(f"Boat {boat_status['name']} left {region_key}")
 
 
 def monitor_job():
+    """Check if status.monitor is set and post update"""
     pass
 
 
-def update_statuses():
-    global boats_df
-    global aircrafts_df
-    print(boats_df)
-    tracked_boats_df = processing.tracked_vessels(boats_df, config.tracked_boats)
-    tracked_boats_snapshot_df = processing.snapshot(tracked_boats_df)
-    for b in config.tracked_boats:
-        mmsi = b["mmsi"]
-        for region_key in config.regions.keys():
-            region = config.regions[region_key]
-        pass
+def set_monitor():
+    """Perform logic to enable and disable status.monitor
+
+    if aircraft active, or BF boats outside port set to True, otherwise False
+    """
+    global status
+    # For all boat statuses
+    # If any boat is not home, as in if boat_status["home"] not in boat_status["regions"]
+    # set status_monitor to true
+    # if any plane is active set status monitor to true
+
+
+def check_offline():
+    # Check if boat has not transmitted for a period, if not, dispatch message and se
+    pass
 
 
 def initilise_statuses():
@@ -74,7 +119,6 @@ def initilise_statuses():
             "online": False,
         }
         status["boats"][mmsi] = boat_status
-    print(status)
 
 
 def main():
@@ -82,7 +126,10 @@ def main():
     initilise_statuses()
     schedule.every(1).seconds.do(reload_dataframes)
     schedule.every(1).seconds.do(update_regions)
-    # schedule.every(1).seconds.do(update_statuses)
+    schedule.every(1).seconds.do(set_monitor)
+    schedule.every(1).seconds.do(monitor_job)  # should be every 15 minutes
+    # schedule.every(10).seconds.do(dump_status)  # For development only
+    logging.info("Monitoring")
     while True:
         schedule.run_pending()
         time.sleep(1)
