@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from numpy.dtypes import DateTime64DType
 import pandas as pd
 from utils import processing
@@ -50,3 +51,19 @@ def test_snapshot():
     assert len(snapshot) == 140
     snapshot = processing.snapshot(df, tracked)
     assert len(snapshot) == 2
+
+
+def test_newer_than():
+    d = {
+        "server_timestamp": [
+            datetime(2024, 1, 1, 0, 0, 0),
+            datetime(2024, 1, 1, 0, 29, 0),
+            datetime(2024, 1, 1, 0, 31, 0),
+            datetime(2024, 1, 1, 1, 0, 0),
+        ]
+    }
+    df = pd.DataFrame(data=d)
+    newer_than_datetime = datetime(2024, 1, 1, 0, 30, 0)
+    df = processing.newer_than(df, newer_than_datetime)
+    print(df)
+    assert len(df) == 2

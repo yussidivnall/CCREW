@@ -1,4 +1,4 @@
-from typing import NotRequired, TypedDict, Dict
+from typing import NotRequired, TypedDict, Dict, Optional
 from datetime import datetime
 
 
@@ -56,12 +56,20 @@ class BoatStatus(TypedDict):
     name: str
     in_regions: list[str]
     online: bool
-    home: NotRequired[str]
+    home: Optional[str]
+
+
+class AircraftStatus(TypedDict):
+    mmsi: int
+    name: str
+    in_regions: list[str]
+    online: bool
 
 
 class AlertsStatus(TypedDict):
     monitor: bool
     boats: Dict[int, BoatStatus]
+    aircrafts: Dict[int, AircraftStatus]
 
 
 class Region(TypedDict):

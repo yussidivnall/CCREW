@@ -28,12 +28,23 @@ def latest_states(vessels: pd.DataFrame) -> pd.DataFrame:
     return vessels
 
 
-def snapshot(df: pd.DataFrame, tracked: list | None = None) -> pd.DataFrame:
+def newer_than(df: pd.DataFrame, oldest: datetime) -> pd.DataFrame:
+    ret = df.copy()[df["server_timestamp"] > oldest]
+    return ret
+
+
+def snapshot(
+    df: pd.DataFrame,
+    tracked: list | None = None,
+    stale: None | timedelta = None,
+) -> pd.DataFrame:
     """Returns latest entry of each vessel in dataframe groupped by mmsi"""
     ret = df.copy()
     ret = ret.loc[df.groupby("mmsi")["server_timestamp"].idxmax()]
     if tracked is not None:
         ret = tracked_vessels(ret, tracked)
+    if stale:
+        ret = newer_than(ret, datetime.now() - stale)
     return ret
 
 

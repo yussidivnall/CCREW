@@ -1,13 +1,17 @@
+from datetime import timedelta
+import json
 import logging
 import schedule
 import time
 import pandas as pd
+from discord_webhook import DiscordWebhook
+
 
 from dtypes import BoatStatus, Region, AlertsStatus
 from utils import processing, logic
 import config
 
-status: AlertsStatus = {"monitor": False, "boats": {}}
+status: AlertsStatus = {"monitor": False, "boats": {}, "aircrafts": {}}
 boats_df: pd.DataFrame
 aircrafts_df: pd.DataFrame
 
@@ -24,8 +28,10 @@ def reload_dataframes():
     boats_df, aircrafts_df = processing.load_dataframes()
 
     # Snapshot of latest position reports
-    boats_snapshot_df = processing.snapshot(boats_df)
-    aircrafts_snapshot_df = processing.snapshot(aircrafts_df)
+    boats_snapshot_df = processing.snapshot(boats_df, stale=timedelta(minutes=15))
+    aircrafts_snapshot_df = processing.snapshot(
+        aircrafts_df, stale=timedelta(minutes=15)
+    )
 
 
 def dump_status():
@@ -35,9 +41,9 @@ def dump_status():
 
 def dispatch_message(message):
     # Post a message to discord
-    print("LALALA")
     logging.info(message)
-    print("Message is ", message)
+    webhook = DiscordWebhook(url=config.discord_webhook_url, content=message)
+    webhook.execute()
 
 
 def check_aircrafts():
@@ -48,10 +54,7 @@ def update_regions():
     """Updates the regions in the global statuses"""
     global boats_snapshot_df, aircrafts_snapshot_df, status
     regions = config.regions
-    dispatch_message("Hello")
-    dispatch_message(status)
     for mmsi in status["boats"].keys():
-        dispatch_message(f"Boat {mmsi}")
         boat_status = status["boats"][mmsi]
         if "home" in boat_status.keys():
             home_key = boat_status["home"]
@@ -65,9 +68,6 @@ def update_regions():
             if in_region:
                 # Boat is in region, check is it's in boat_status[region], If it is continue
                 # If not, add to boat_status[regions] and dispatch message "Boat entered _region_.
-                #
-                # and check if it's also the home region
-                # If it's the home region dispatch message "Boat has returned home"
 
                 if region_key in boat_status["in_regions"]:
                     # Region already in status, do nothing
@@ -78,7 +78,8 @@ def update_regions():
                 pass
             else:
                 # If boat not in region
-                # Check if region is in boat_status['region'], if so dispatch message "boat has left region"
+                # Check if region is in boat_status['region'],
+                # if so dispatch message "boat has left region", and remove from regions
                 if region_key in boat_status["in_regions"]:
                     boat_status["in_regions"].remove(region_key)
                     dispatch_message(f"Boat {boat_status['name']} left {region_key}")
@@ -92,13 +93,32 @@ def monitor_job():
 def set_monitor():
     """Perform logic to enable and disable status.monitor
 
-    if aircraft active, or BF boats outside port set to True, otherwise False
+    if aircraft active, or BF boats outside port set to True and return, otherwise False
     """
     global status
+    global boats_snapshot_df
+    global aircrafts_snapshot_df
+
+    # Any aircraft enables monitoring
+    if len(aircrafts_snapshot_df) > 0:
+        if status["monitor"] == True:
+            # Aircraft present but already monitoring
+            return
+        else:
+            status["monitor"] = True
+            dispatch_message("Aircraft pesent in secene, enabling monitoring")
+            return
     # For all boat statuses
     # If any boat is not home, as in if boat_status["home"] not in boat_status["regions"]
     # set status_monitor to true
     # if any plane is active set status monitor to true
+
+    # No alerts
+    if status["monitor"] is False:
+        return
+    else:
+        status["monitor"] = False
+        dispatch_message("Disabling monitoring")
 
 
 def check_offline():
@@ -117,6 +137,7 @@ def initilise_statuses():
             "name": name,
             "in_regions": [],
             "online": False,
+            "home": None,
         }
         status["boats"][mmsi] = boat_status
 

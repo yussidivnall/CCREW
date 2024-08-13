@@ -11,7 +11,7 @@ from pathlib import Path
 import config
 
 from dtypes import AircraftPosition, BoatPosition
-from utils.parsers import parse_position_report
+from utils.parsers import parse_position_report, parse_sar_aircraft_report
 
 # Holds a state for each vessels, indexed by mmsi
 # e.g state["boats"]["mmsi"] = boat: BoatPosition
@@ -67,6 +67,12 @@ def update(message):
         record = parse_position_report(message)
         if update_check(state["boats"], record):
             add_to_log(config.boats_log_file, record)
+    elif message_type == "StandardSearchAndRescueAircraftReport":
+        print(f"Aircraft {message}")
+        record = parse_sar_aircraft_report(message)
+        print(f"Aircraft {record}")
+        if update_check(state["aircrafts"], record):
+            add_to_log(config.aircrafts_log_file, record)
 
 
 async def connect_ais_stream():
