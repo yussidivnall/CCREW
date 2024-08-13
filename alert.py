@@ -41,48 +41,62 @@ def dump_status():
 
 def dispatch_message(message):
     # Post a message to discord
-    logging.info(message)
+    logging.info(f"discord msg: {message}")
     webhook = DiscordWebhook(url=config.discord_webhook_url, content=message)
     webhook.execute()
 
 
 def check_aircrafts():
+    """Check aircrafts"""
     global status
 
 
-def update_regions():
-    """Updates the regions in the global statuses"""
+def update_tracked_boats():
+    """Update tracked boats in status to latest snapshot"""
     global boats_snapshot_df, aircrafts_snapshot_df, status
-    regions = config.regions
-    for mmsi in status["boats"].keys():
-        boat_status = status["boats"][mmsi]
-        if "home" in boat_status.keys():
-            home_key = boat_status["home"]
-            home_region = regions[home_key]
+    mmsis = [m["mmsi"] for m in status["boats"]]
 
-        boat_snapshot = boats_snapshot_df[boats_snapshot_df.mmsi == mmsi].iloc[0]
-        # lat, lon = boat[["lat", "lon"]]
-        for region_key in regions:
-            region: Region = regions[region_key]
-            in_region = logic.boat_in_region(boat_snapshot, region)
-            if in_region:
-                # Boat is in region, check is it's in boat_status[region], If it is continue
-                # If not, add to boat_status[regions] and dispatch message "Boat entered _region_.
+    processing.tracked_vessels = processing.tracked_vessels(
+        boats_snapshot_df, status["boats"]
+    )
 
-                if region_key in boat_status["in_regions"]:
-                    # Region already in status, do nothing
-                    continue
-                else:
-                    boat_status["in_regions"].append(region_key)
-                    dispatch_message(f"Boat {boat_status['name']} entered {region_key}")
-                pass
-            else:
-                # If boat not in region
-                # Check if region is in boat_status['region'],
-                # if so dispatch message "boat has left region", and remove from regions
-                if region_key in boat_status["in_regions"]:
-                    boat_status["in_regions"].remove(region_key)
-                    dispatch_message(f"Boat {boat_status['name']} left {region_key}")
+    # tracked_boats = boats_snapshot_df[boats_snapshot_df[] ]
+    pass
+
+    # def update_regions():
+    #     """This junk needs to die!"""
+    #     """Updates the regions in the global statuses"""
+    #     global boats_snapshot_df, aircrafts_snapshot_df, status
+    #     regions = config.regions
+    #     for mmsi in status["boats"].keys():
+    #         boat_status = status["boats"][mmsi]
+    #         if "home" in boat_status.keys():
+    #             home_key = boat_status["home"]
+    #             home_region = regions[home_key]
+    #
+    #         boat_snapshot = boats_snapshot_df[boats_snapshot_df.mmsi == mmsi].iloc[0]
+    #         # lat, lon = boat[["lat", "lon"]]
+    #         for region_key in regions:
+    #             region: Region = regions[region_key]
+    #             in_region = logic.boat_in_region(boat_snapshot, region)
+    #             if in_region:
+    #                 # Boat is in region, check is it's in boat_status[region], If it is continue
+    #                 # If not, add to boat_status[regions] and dispatch message "Boat entered _region_.
+    #
+    #                 if region_key in boat_status["in_regions"]:
+    #                     # Region already in status, do nothing
+    #                     continue
+    #                 else:
+    #                     boat_status["in_regions"].append(region_key)
+    #                     dispatch_message(f"Boat {boat_status['name']} entered {region_key}")
+    #                 pass
+    #             else:
+    #                 # If boat not in region
+    #                 # Check if region is in boat_status['region'],
+    #                 # if so dispatch message "boat has left region", and remove from regions
+    #                 if region_key in boat_status["in_regions"]:
+    #                     boat_status["in_regions"].remove(region_key)
+    #                     dispatch_message(f"Boat {boat_status['name']} left {region_key}")
 
 
 def monitor_job():
@@ -145,7 +159,7 @@ def initilise_statuses():
 def main():
     reload_dataframes()
     initilise_statuses()
-    schedule.every(1).seconds.do(reload_dataframes)
+    schedule.every(15).seconds.do(reload_dataframes)
     schedule.every(1).seconds.do(update_regions)
     schedule.every(1).seconds.do(set_monitor)
     schedule.every(1).seconds.do(monitor_job)  # should be every 15 minutes

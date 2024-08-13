@@ -1,7 +1,9 @@
-import pandas as pd
 from datetime import datetime, timedelta
+
+import pandas as pd
+
 import config
-from dtypes import BoatPosition, AircraftPosition
+from dtypes import AircraftPosition, BoatPosition
 
 
 def tail_log(df, rows=-50000, oldest=1800):
@@ -20,6 +22,13 @@ def fix_datetime_columns(df: pd.DataFrame, columns=["server_timestamp"]):
         col = pd.to_datetime(col)
         df[column_name] = col
     return df
+
+
+def filter_mmsis(df: pd.DataFrame, mmsis: list):
+    """Return only rows with 'mmsi' in mmsis"""
+    mask = df["mmsi"].isin(mmsis)
+    ret = df.loc[mask].copy()
+    return ret
 
 
 def latest_states(vessels: pd.DataFrame) -> pd.DataFrame:
@@ -50,6 +59,11 @@ def snapshot(
 
 def tracked_vessels(vessels: pd.DataFrame, tracking_vessels: list) -> pd.DataFrame:
     """Return a dataframe with only tracked vessels present in tracking_vessels
+    @ Probably replaced with filter_mmsis
+
+    Args:
+        vessels - dataframe
+        tracking_vessels - list of boat objects
 
     trackiong vessels probably comes from config and looks like this
     [{"mmsi":123, "label": "Label To Apply To Boat", "name": "Anything, not really used for nothing"}, ...]

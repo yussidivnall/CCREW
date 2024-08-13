@@ -67,3 +67,11 @@ def test_newer_than():
     df = processing.newer_than(df, newer_than_datetime)
     print(df)
     assert len(df) == 2
+
+
+def test_filter_tracked():
+    mmsis = [123, 456]
+    d = {"mmsi": [123, 456, 678, 10, 11, 12]}
+    df = pd.DataFrame(d)
+    df = processing.filter_mmsis(df, mmsis)
+    assert len(df) == 2
