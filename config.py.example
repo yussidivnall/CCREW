@@ -1,9 +1,4 @@
-# See https://realpython.com/how-to-make-a-discord-bot-python/
-discord_token = (
-    "<DISCORD API TOKEN>"
-)
-# Discord channel for bot to post alerts on
-discord_channel_id = <DISCORD CHANNEL ID>
+discord_webhook_url = <DISCORD WEBHOOK>
 # API Key for AIS Stream
 api_key = <AISSTream API Key>
 arena = [[[lat, lon], [lat, lon]]]

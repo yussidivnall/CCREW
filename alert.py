@@ -160,10 +160,8 @@ def main():
     reload_dataframes()
     initilise_statuses()
     schedule.every(15).seconds.do(reload_dataframes)
-    schedule.every(1).seconds.do(update_regions)
     schedule.every(1).seconds.do(set_monitor)
     schedule.every(1).seconds.do(monitor_job)  # should be every 15 minutes
-    # schedule.every(10).seconds.do(dump_status)  # For development only
     logging.info("Monitoring")
     while True:
         schedule.run_pending()

@@ -83,4 +83,7 @@ def load_dataframes() -> tuple[pd.DataFrame, pd.DataFrame]:
     boats = pd.read_csv(config.boats_log_file)
     aircrafts = pd.read_csv(config.aircrafts_log_file)
 
+    boats["server_timestamp"] = pd.to_datetime(boats["server_timestamp"])
+    aircrafts["server_timestamp"] = pd.to_datetime(aircrafts["server_timestamp"])
+
     return (boats, aircrafts)

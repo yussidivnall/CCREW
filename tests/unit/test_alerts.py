@@ -127,3 +127,11 @@ def test_aircraft_triggers_alert_flag():
 
 # def test_boat_outside_home_triggers_alert_flag():
 #     assert False
+
+
+@patch("alert.status", mock_status())
+@patch("alert.boats_snapshot_df", mock_boats_snapshot_df())
+def test_update_tracked_boats():
+    print(alert.boats_snapshot_df)
+    print(alert.status)
+    assert False
