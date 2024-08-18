@@ -47,7 +47,13 @@ def snapshot(
     tracked: list | None = None,
     stale: None | timedelta = None,
 ) -> pd.DataFrame:
-    """Returns latest entry of each vessel in dataframe groupped by mmsi"""
+    """Returns latest entry of each vessel in dataframe groupped by mmsi
+
+    Args
+        df -
+        tracked - filter only tracked boats, if None return all
+        stale - remove entries older then (now - stale)
+    """
     ret = df.copy()
     ret = ret.loc[df.groupby("mmsi")["server_timestamp"].idxmax()]
     if tracked is not None:
@@ -75,13 +81,15 @@ def tracked_vessels(vessels: pd.DataFrame, tracking_vessels: list) -> pd.DataFra
     return ret
 
 
-def load_dataframes() -> tuple[pd.DataFrame, pd.DataFrame]:
+def load_dataframes(
+    boats_log_file=config.boats_log_file, aircrafts_log_file=config.aircrafts_log_file
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """A helper to load both boat and aircraft log dataframe
 
     Returns a tuple of both dataframes
     """
-    boats = pd.read_csv(config.boats_log_file)
-    aircrafts = pd.read_csv(config.aircrafts_log_file)
+    boats = pd.read_csv(boats_log_file)
+    aircrafts = pd.read_csv(aircrafts_log_file)
 
     boats["server_timestamp"] = pd.to_datetime(boats["server_timestamp"])
     aircrafts["server_timestamp"] = pd.to_datetime(aircrafts["server_timestamp"])

@@ -1,4 +1,5 @@
-from datetime import timedelta
+import os
+from datetime import timedelta, datetime
 import json
 import logging
 import schedule
@@ -8,7 +9,7 @@ from discord_webhook import DiscordWebhook
 
 
 from dtypes import BoatStatus, Region, AlertsStatus
-from utils import processing, logic
+from utils import processing, logic, plotting
 import config
 
 status: AlertsStatus = {"monitor": False, "boats": {}, "aircrafts": {}}
@@ -39,10 +40,13 @@ def dump_status():
     print(json.dumps(status, indent=2))
 
 
-def dispatch_message(message):
+def dispatch_message(message, image=None):
     # Post a message to discord
     logging.info(f"discord msg: {message}")
     webhook = DiscordWebhook(url=config.discord_webhook_url, content=message)
+    if image:
+        with open(image, "rb") as f:
+            webhook.add_file(f.read(), filename="monitoring.png")
     webhook.execute()
 
 
@@ -99,9 +103,31 @@ def update_tracked_boats():
     #                     dispatch_message(f"Boat {boat_status['name']} left {region_key}")
 
 
+def generate_map(filename):
+    global boats_df
+    global aircrafts_df
+    global status
+    boats = processing.newer_than(boats_df, datetime.now() - timedelta(minutes=15))
+    aircrafts = processing.newer_than(
+        aircrafts_df, datetime.now() - timedelta(minutes=15)
+    )
+    fig = plotting.plot_scene(config.arena, boats, aircrafts, status)
+    fig.write_image(filename)
+
+
 def monitor_job():
     """Check if status.monitor is set and post update"""
-    pass
+    global status
+    if not status["monitor"]:
+        return
+
+    filename = os.path.join(config.images_directory, "monitoring.png")
+    generate_map(filename)
+    message = f"{datetime.now()} - Monitoring"
+    dispatch_message(message, filename)
+
+    # fig.show()
+    # pass
 
 
 def set_monitor():
@@ -120,7 +146,9 @@ def set_monitor():
             return
         else:
             status["monitor"] = True
-            dispatch_message("Aircraft pesent in secene, enabling monitoring")
+            filename = os.path.join(config.images_directory, "enabled.png")
+            generate_map(filename)
+            dispatch_message("Aircraft pesent in secene, enabling monitoring", filename)
             return
     # For all boat statuses
     # If any boat is not home, as in if boat_status["home"] not in boat_status["regions"]
@@ -160,8 +188,8 @@ def main():
     reload_dataframes()
     initilise_statuses()
     schedule.every(15).seconds.do(reload_dataframes)
-    schedule.every(1).seconds.do(set_monitor)
-    schedule.every(1).seconds.do(monitor_job)  # should be every 15 minutes
+    schedule.every(30).seconds.do(set_monitor)
+    schedule.every(900).seconds.do(monitor_job)  # should be every 15 minutes
     logging.info("Monitoring")
     while True:
         schedule.run_pending()
