@@ -1,4 +1,5 @@
 #!/bin/bash
+python ./discord_send.py "$(date) - Starting monitoring service"
 
 function cleanup()
 {
@@ -54,4 +55,4 @@ while /bin/true; do
   fi
   sleep 60
 done
-python ./discord_send.py "Monitoring ended, quitting, probably a crash!"
+python ./discord_send.py "$(date) - Monitoring service ended, quitting, probably a crash!"
