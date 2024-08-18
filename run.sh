@@ -54,3 +54,4 @@ while /bin/true; do
   fi
   sleep 60
 done
+python ./discord_send.py "Monitoring ended, quitting, probably a crash!"
