@@ -1,4 +1,4 @@
-from typing import NotRequired, TypedDict, Dict, Optional
+from typing import TypedDict, Dict, Optional
 from datetime import datetime
 
 
