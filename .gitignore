@@ -1,3 +1,5 @@
 __pycache__
 utils/config.py
 config.py
+data/*.csv
+images/*.png
