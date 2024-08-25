@@ -21,6 +21,7 @@ def test_monitoring_map():
                 "in_regions": [],
                 "online": True,
                 "home": None,
+                "color": "blue",
             },
             235102528: {
                 "mmsi": 235102528,
@@ -28,6 +29,7 @@ def test_monitoring_map():
                 "in_regions": [],
                 "online": True,
                 "home": None,
+                "color": "yellow",
             },
             235098051: {
                 "mmsi": 235098051,
@@ -35,6 +37,7 @@ def test_monitoring_map():
                 "in_regions": [],
                 "online": True,
                 "home": None,
+                "color": "red",
             },
             235103844: {
                 "mmsi": 235103844,
@@ -42,6 +45,7 @@ def test_monitoring_map():
                 "in_regions": [],
                 "online": True,
                 "home": None,
+                "color": "green",
             },
         },
         "aircrafts": {},

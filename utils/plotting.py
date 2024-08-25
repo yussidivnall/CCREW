@@ -1,5 +1,4 @@
-from inspect import Arguments
-from typing import Dict
+from datetime import timedelta
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -76,37 +75,38 @@ def plot_map(data, arena) -> Figure:
 
 def vessel_snapshot_trace(df, symbol="circle"):
     df = processing.snapshot(df)
+    df["ship_name"] = df["ship_name"].astype(str)
     ret = go.Scattermapbox(
         lat=df["lat"],
         lon=df["lon"],
-        # mode="lines+markers",
+        mode="markers+text",
         # marker=dict(symbol="circle"),
         marker=dict(
-            symbol=symbol,
-            size=15,
+            color="#A0A0A0",
+            # symbol="square",
+            size=4,
             # angle="previous",
         ),
         # name=f"{group['ship_name']}",
-        # text=df["ship_name"].iloc[-1],
-        # textposition="top right",
+        text=df["ship_name"],
+        textposition="top right",
+        # showlegend=False,
         # hoverinfo="text",
     )
     return ret
 
 
-def vessel_path_trace(group, symbol="circle"):
+def last_point(trace):
+    return
+
+
+def vessel_path_trace(group, symbol="circle", color="gray"):
     print(group["ship_name"])
     ret = go.Scattermapbox(
         lat=group["lat"],
         lon=group["lon"],
-        mode="lines+markers",
-        # marker=dict(symbol="circle"),
-        marker=dict(
-            symbol=symbol,
-            size=15,
-            # angle="previous",
-        ),
-        # name=f"{group['ship_name']}",
+        mode="lines",
+        line=dict(color=color),
         text=group["ship_name"].iloc[-1],
         textposition="top right",
         hoverinfo="text",
@@ -150,22 +150,23 @@ def plot_scene(
     )
 
     # Snapshot of all boats
-    # boats_snapshot_trace = vessel_snapshot_trace(boats)
-    # fig.add_trace(boats_snapshot_trace)
+    boats_snapshot_trace = vessel_snapshot_trace(boats)
+    fig.add_trace(boats_snapshot_trace)
 
     # Trace for tracked boats
     tracked_boats_mmsis = [m for m in status["boats"]]
     tracked_boats = processing.filter_mmsis(boats, tracked_boats_mmsis)
+    tracked_boats = processing.sieve_timedelta(tracked_boats, timedelta(seconds=60))
     for mmsi, group in tracked_boats.groupby("mmsi"):
         m = pd.to_numeric(mmsi)
         name = status["boats"][int(m)]["name"]
-        # color = status["boats"][int(mmsi)]["color"]
-        trace = vessel_path_trace(group)
+        color = status["boats"][int(m)]["color"]
+        trace = vessel_path_trace(group, color=color)
         trace.name = name
         fig.add_trace(trace)
     # Trace all aircrafts
     for mmsi, group in aircrafts.groupby("mmsi"):
-        trace = vessel_path_trace(group, symbol="2")
+        trace = vessel_path_trace(group, symbol="triangle")
         name = f"Aircraft {mmsi}"
         trace.name = name
         fig.add_trace(trace)

@@ -107,9 +107,9 @@ def generate_map(filename):
     global boats_df
     global aircrafts_df
     global status
-    boats = processing.newer_than(boats_df, datetime.now() - timedelta(minutes=15))
+    boats = processing.newer_than(boats_df, datetime.now() - timedelta(minutes=60))
     aircrafts = processing.newer_than(
-        aircrafts_df, datetime.now() - timedelta(minutes=15)
+        aircrafts_df, datetime.now() - timedelta(minutes=60)
     )
     fig = plotting.plot_scene(config.arena, boats, aircrafts, status)
     fig.write_image(filename)
