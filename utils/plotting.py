@@ -107,6 +107,10 @@ def vessel_path_trace(group, symbol="circle", color="gray"):
         lon=group["lon"],
         mode="lines",
         line=dict(color=color),
+        marker=dict(
+            color=color,
+            size=8,
+        ),
         text=group["ship_name"].iloc[-1],
         textposition="top right",
         hoverinfo="text",
