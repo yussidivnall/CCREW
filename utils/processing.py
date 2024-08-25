@@ -42,6 +42,42 @@ def newer_than(df: pd.DataFrame, oldest: datetime) -> pd.DataFrame:
     return ret
 
 
+def filter_time_intervals(group, min_interval):
+    timestamps = group["server_timestamp"]
+    last_timestamp = timestamps.iloc[0]
+    mask = [False] * len(timestamps)
+    mask[0] = True
+    for i, t in enumerate(timestamps):
+        if t >= last_timestamp + min_interval:
+            mask[i] = True
+            last_timestamp = t
+    group = group.loc[mask]
+
+    print(group)
+    return group
+
+
+def sieve_timedelta(
+    df: pd.DataFrame, minimum_elapsed=timedelta(seconds=30)
+) -> pd.DataFrame:
+    """Group by MMSI, for each vessel, only keep rows which are `minimum_elapsed` apart or more"""
+    df = df.copy()
+    groups = df.groupby("mmsi")
+    sieved_groups = []
+    for _, group in groups:
+        timestamps = group["server_timestamp"]
+        last_timestamp = timestamps.iloc[0]
+        mask = [False] * len(timestamps)
+        mask[0] = True
+        for i, ts in enumerate(timestamps):
+            if ts >= last_timestamp + minimum_elapsed:
+                mask[i] = True
+                last_timestamp = ts
+        group = group.loc[mask]
+        sieved_groups.append(group)
+    return pd.concat(sieved_groups, ignore_index=True)
+
+
 def snapshot(
     df: pd.DataFrame,
     tracked: list | None = None,

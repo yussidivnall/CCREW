@@ -75,3 +75,32 @@ def test_filter_tracked():
     df = pd.DataFrame(d)
     df = processing.filter_mmsis(df, mmsis)
     assert len(df) == 2
+
+
+def test_sieve():
+    d = {
+        "server_timestamp": [
+            datetime(2024, 1, 1, 0, 0, 0),
+            datetime(2024, 1, 1, 0, 0, 15),
+            datetime(2024, 1, 1, 0, 0, 30),
+            datetime(2024, 1, 1, 0, 0, 2),
+            datetime(2024, 1, 1, 0, 0, 20),
+            datetime(2024, 1, 1, 0, 0, 49),
+        ],
+        "mmsi": [1, 1, 1, 2, 2, 2],
+    }
+    df = pd.DataFrame(d)
+    e = {
+        "server_timestamp": [
+            datetime(2024, 1, 1, 0, 0, 0),
+            datetime(2024, 1, 1, 0, 0, 30),
+            datetime(2024, 1, 1, 0, 0, 2),
+            datetime(2024, 1, 1, 0, 0, 49),
+        ],
+        "mmsi": [1, 1, 2, 2],
+    }
+    expected_df = pd.DataFrame(e)
+
+    actual_df = processing.sieve_timedelta(df, minimum_elapsed=timedelta(seconds=30))
+    print(actual_df)
+    pd.testing.assert_frame_equal(expected_df, actual_df)

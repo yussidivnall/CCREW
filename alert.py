@@ -173,10 +173,12 @@ def initilise_statuses():
     for boat in config.tracked_boats:
         mmsi = boat["mmsi"]
         name = boat["name"]
+        color = boat["color"]
 
         boat_status: BoatStatus = {
             "mmsi": mmsi,
             "name": name,
+            "color": color,
             "in_regions": [],
             "online": False,
             "home": None,

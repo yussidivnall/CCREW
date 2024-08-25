@@ -54,6 +54,7 @@ class AircraftPosition(TypedDict):
 class BoatStatus(TypedDict):
     mmsi: int
     name: str
+    color: str
     in_regions: list[str]
     online: bool
     home: Optional[str]

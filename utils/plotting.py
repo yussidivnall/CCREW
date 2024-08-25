@@ -157,15 +157,17 @@ def plot_scene(
     tracked_boats_mmsis = [m for m in status["boats"]]
     tracked_boats = processing.filter_mmsis(boats, tracked_boats_mmsis)
     for mmsi, group in tracked_boats.groupby("mmsi"):
-        trace = vessel_path_trace(group)
         m = pd.to_numeric(mmsi)
         name = status["boats"][int(m)]["name"]
-        # trace.name = status["boats"][int(mmsi)]
+        # color = status["boats"][int(mmsi)]["color"]
+        trace = vessel_path_trace(group)
         trace.name = name
         fig.add_trace(trace)
     # Trace all aircrafts
     for mmsi, group in aircrafts.groupby("mmsi"):
         trace = vessel_path_trace(group, symbol="2")
+        name = f"Aircraft {mmsi}"
+        trace.name = name
         fig.add_trace(trace)
 
     return fig
