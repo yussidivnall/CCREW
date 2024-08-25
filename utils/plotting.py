@@ -90,7 +90,7 @@ def vessel_snapshot_trace(df, symbol="circle"):
         # name=f"{group['ship_name']}",
         text=df["ship_name"],
         textposition="top right",
-        # showlegend=False,
+        showlegend=False,
         # hoverinfo="text",
     )
     return ret
