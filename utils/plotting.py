@@ -96,8 +96,28 @@ def vessel_snapshot_trace(df, symbol="circle"):
     return ret
 
 
-def last_point(trace):
-    return
+def label_trace(group: pd.DataFrame, color="gray", text=None):
+    """Add a trace with only the last point and a label"""
+
+    # Sometimes we want to give a label (for planes)
+    if text:
+        t = [text]
+    else:
+        t = [group["ship_name"].iloc[-1]]
+
+    ret = go.Scattermapbox(
+        lat=[group["lat"].iloc[-1]],
+        lon=[group["lon"].iloc[-1]],
+        mode="markers+text",
+        marker=dict(
+            color=color,
+            size=12,
+        ),
+        text=t,
+        textposition="top right",
+        showlegend=False,
+    )
+    return ret
 
 
 def vessel_path_trace(group, symbol="circle", color="gray"):
@@ -109,7 +129,7 @@ def vessel_path_trace(group, symbol="circle", color="gray"):
         line=dict(color=color),
         marker=dict(
             color=color,
-            size=8,
+            size=15,
         ),
         text=group["ship_name"].iloc[-1],
         textposition="top right",
@@ -168,11 +188,15 @@ def plot_scene(
         trace = vessel_path_trace(group, color=color)
         trace.name = name
         fig.add_trace(trace)
+        label = label_trace(group, color)
+        fig.add_trace(label)
     # Trace all aircrafts
     for mmsi, group in aircrafts.groupby("mmsi"):
         trace = vessel_path_trace(group, symbol="triangle")
         name = f"Aircraft {mmsi}"
         trace.name = name
         fig.add_trace(trace)
+        label = label_trace(group, text=name)
+        fig.add_trace(label)
 
     return fig
