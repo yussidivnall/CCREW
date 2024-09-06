@@ -21,7 +21,7 @@ def test_monitoring_map():
                 "in_regions": [],
                 "online": True,
                 "home": None,
-                "color": "blue",
+                "color": "#00FF00",
             },
             235102528: {
                 "mmsi": 235102528,
@@ -59,7 +59,7 @@ def test_monitoring_map():
     # fig = plotting.plot_map(boats_snapshot_df, arena=arena)
 
     fig = plotting.plot_scene(arena, boats_df, aircrafts_df, status)
-
+    fig.write_image("/tmp/fig.png")
     fig.show()
     print("Noooo")
     # assert False

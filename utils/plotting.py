@@ -159,6 +159,9 @@ def plot_scene(
         "lon": (arena_bounds["west"] + arena_bounds["east"]) / 2,
     }
 
+    # TODO
+    # arena_trace = get_region_trace()
+
     fig: Figure = go.Figure()
     fig.add_trace(go.Scattermapbox())
     fig.update_layout(
@@ -168,7 +171,7 @@ def plot_scene(
                 lat=center["lat"],
                 lon=center["lon"],
             ),
-            zoom=8.8,  # Adjust the zoom level
+            zoom=8.2,  # Adjust the zoom level
         ),
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
     )
@@ -176,7 +179,6 @@ def plot_scene(
     # Snapshot of all boats
     boats_snapshot_trace = vessel_snapshot_trace(boats)
     fig.add_trace(boats_snapshot_trace)
-
     # Trace for tracked boats
     tracked_boats_mmsis = [m for m in status["boats"]]
     tracked_boats = processing.filter_mmsis(boats, tracked_boats_mmsis)

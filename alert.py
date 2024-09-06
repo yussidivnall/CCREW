@@ -168,10 +168,10 @@ def check_offline():
     pass
 
 
-def initilise_statuses():
+def initilise_statuses() -> None:
     global status
     for boat in config.tracked_boats:
-        mmsi = boat["mmsi"]
+        mmsi = int(boat["mmsi"])
         name = boat["name"]
         color = boat["color"]
 
