@@ -93,6 +93,7 @@ def test_post_to_discord():
 @patch("alert.aircrafts_snapshot_df", pd.DataFrame())
 @patch("alert.status", {"monitor": False, "boats": {}, "aircrafts": {}})
 @patch("alert.dispatch_message", Mock())
+@patch("alert.generate_map", Mock())
 def test_aircraft_triggers_alert_flag():
 
     # not monitoring
@@ -106,7 +107,7 @@ def test_aircraft_triggers_alert_flag():
     print(alert.status)
     assert alert.status["monitor"]
     alert.dispatch_message.assert_called_with(  # pyright: ignore[reportFunctionMemberAccess]
-        "Aircraft pesent in secene, enabling monitoring"
+        "Aircraft pesent in secene, enabling monitoring", "images/enabled.png"
     )
 
     # aircrafts gone
@@ -125,13 +126,17 @@ def test_aircraft_triggers_alert_flag():
     )  # pyright: ignore[reportFunctionMemberAccess]
 
 
+# TODO
+# def test_generate_map():
+#     pass
+#
 # def test_boat_outside_home_triggers_alert_flag():
 #     assert False
 
 
-@patch("alert.status", mock_status())
-@patch("alert.boats_snapshot_df", mock_boats_snapshot_df())
-def test_update_tracked_boats():
-    print(alert.boats_snapshot_df)
-    print(alert.status)
-    assert False
+# @patch("alert.status", mock_status())
+# @patch("alert.boats_snapshot_df", mock_boats_snapshot_df())
+# def test_update_tracked_boats():
+#     print(alert.boats_snapshot_df)
+#     print(alert.status)
+#     assert False

@@ -140,7 +140,11 @@ def vessel_path_trace(group, symbol="circle", color="gray"):
 
 
 def plot_scene(
-    arena, boats: pd.DataFrame, aircrafts: pd.DataFrame, status: AlertsStatus
+    arena,
+    boats: pd.DataFrame,
+    aircrafts: pd.DataFrame,
+    status: AlertsStatus,
+    zoom: int = 8.2,
 ) -> Figure:
     """Plots the scene for alerts
 
@@ -171,7 +175,7 @@ def plot_scene(
                 lat=center["lat"],
                 lon=center["lon"],
             ),
-            zoom=8.2,  # Adjust the zoom level
+            zoom=zoom,
         ),
         margin={"r": 0, "t": 0, "l": 0, "b": 0},
     )
