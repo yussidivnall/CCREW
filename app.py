@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import threading
 from flask import Flask
 import track
@@ -38,13 +39,17 @@ def create_app(config_name=None):
     alerting_thread.daemon = True
     alerting_thread.start()
 
-    @app.route("/")
-    def index():
-        return "Hello, World!"
-
     @app.route("/health")
     def health():
         return {"updated": track.state["last_updated"]}
+
+    @app.route("/snapshot")
+    def snapshot():
+        alert.generate_map("snapshot.png")
+        alert.dispatch_message(
+            message=f"{track.state['last_updated']} - Snapshot", image="snapshot.png"
+        )
+        return {}
 
     return app
 
