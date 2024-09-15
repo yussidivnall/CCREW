@@ -1,0 +1,12 @@
+services:
+  ccrew-app:
+    build: .
+    restart: always
+    ports:
+      - 8050:5000
+    volumes:
+      - ais_data:/srv/app/data
+
+volumes:
+  ais_data:
+    
