@@ -1,24 +1,25 @@
 """ Logs AIStream Events to CSV files """
 
-from datetime import timedelta
-import json
-import csv
 import asyncio
+import csv
+import json
 import logging
-import websockets
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-import config
+import websockets
 
+import config
 from dtypes import AircraftPosition, BoatPosition
 from utils.parsers import parse_position_report, parse_sar_aircraft_report
 
 # Holds a state for each vessels, indexed by mmsi
 # e.g state["boats"]["mmsi"] = boat: BoatPosition
-# e.g state["aircrafts"]["mmsi"] = aircraft: AircraftPosition
+# e.g state["aircraft"]["mmsi"] = aircraft: AircraftPosition
 state = {
+    "last_updated": None,
     "boats": {},
-    "aircrafts": {},
+    "aircraft": {},
 }
 
 
@@ -27,6 +28,7 @@ def add_to_log(logfile, entry):
     with open(logfile, mode="a", newline="") as f:
         writer = csv.DictWriter(f, headers)
         writer.writerow(entry)
+    state["last_updated"] = datetime.now(timezone.utc)
 
 
 def update_check(state: dict, entry: AircraftPosition | BoatPosition) -> bool:
@@ -38,7 +40,7 @@ def update_check(state: dict, entry: AircraftPosition | BoatPosition) -> bool:
     else return false
 
     Arguments:
-    state: a dictionary to check entry against (boats of aircrafts)
+    state: a dictionary to check entry against (boats or aircraft)
     entry: entry to check against
     """
 
@@ -71,33 +73,44 @@ def update(message):
         print(f"Aircraft {message}")
         record = parse_sar_aircraft_report(message)
         print(f"Aircraft {record}")
-        if update_check(state["aircrafts"], record):
+        if update_check(state["aircraft"], record):
             add_to_log(config.aircrafts_log_file, record)
 
 
 async def connect_ais_stream():
     api_key = config.api_key
     arena = config.arena
-    async with websockets.connect("wss://stream.aisstream.io/v0/stream") as websocket:
-        subscribe_message = {
-            "APIKey": api_key,
-            "BoundingBoxes": arena,
-            # "FiltersShipMMSI": ["368207620", "367719770", "211476060"], # Optional!
-            "FilterMessageTypes": [
-                "PositionReport",
-                "StandardSearchAndRescueAircraftReport",
-            ],
-        }
+    while True:
+        logging.info("Connecting to AIS Stream")
+        async with websockets.connect(
+            "wss://stream.aisstream.io/v0/stream"
+        ) as websocket:
+            try:
+                subscribe_message = {
+                    "APIKey": api_key,
+                    "BoundingBoxes": arena,
+                    # "FiltersShipMMSI": ["368207620", "367719770", "211476060"], # Optional!
+                    "FilterMessageTypes": [
+                        "PositionReport",
+                        "StandardSearchAndRescueAircraftReport",
+                    ],
+                }
 
-        subscribe_message_json = json.dumps(subscribe_message)
-        await websocket.send(subscribe_message_json)
+                subscribe_message_json = json.dumps(subscribe_message)
+                await websocket.send(subscribe_message_json)
 
-        async for message_json in websocket:
-            message = json.loads(message_json)
-            update(message)
+                async for message_json in websocket:
+                    message = json.loads(message_json)
+                    update(message)
+            except websockets.ConnectionClosedError as ccerr:
+                logging.error(ccerr)
+                await asyncio.sleep(5)
+            except Exception as err:
+                logging.error(err)
+                await asyncio.sleep(5)
 
 
-def initilise():
+def initialise():
     # Create logfiles if needed
     if not Path(config.boats_log_file).is_file():
         logging.info(f" creating csv logfile {config.boats_log_file}")
@@ -114,7 +127,7 @@ def initilise():
 
 
 def main():
-    initilise()
+    initialise()
     print("Tracking...")
     asyncio.run(connect_ais_stream())
 

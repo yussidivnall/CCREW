@@ -186,6 +186,21 @@ def initilise_statuses() -> None:
         status["boats"][mmsi] = boat_status
 
 
+def schedule_tasks():
+    schedule.every(15).seconds.do(reload_dataframes)
+    schedule.every(30).seconds.do(set_monitor)
+    schedule.every(900).seconds.do(monitor_job)  # should be every 15 minutes
+
+
+async def run():
+    reload_dataframes()
+    initilise_statuses()
+    schedule_tasks()
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+
 def main():
     reload_dataframes()
     initilise_statuses()

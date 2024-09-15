@@ -93,7 +93,8 @@ def test_post_to_discord():
 @patch("alert.aircrafts_snapshot_df", pd.DataFrame())
 @patch("alert.status", {"monitor": False, "boats": {}, "aircrafts": {}})
 @patch("alert.dispatch_message", Mock())
-@patch("alert.generate_map", Mock())
+# @patch("alert.generate_map", Mock())
+@patch("alert.dispatch_message", Mock())
 def test_aircraft_triggers_alert_flag():
 
     # not monitoring

@@ -10,6 +10,7 @@ from utils import processing, plotting
 
 
 def main():
+
     if not os.path.exists(config.images_directory):
         os.mkdir(config.images_directory)
 
