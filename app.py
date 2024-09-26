@@ -44,7 +44,7 @@ def create_app(config_name=None):
     app = Flask(__name__)
 
     # Only start background jobs once in the main thread (debug starts it twice)
-    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+    if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         background_jobs()
 
     @app.route("/health")
