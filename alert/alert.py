@@ -12,27 +12,25 @@ from dtypes import BoatStatus, Region, AlertsStatus
 from utils import processing, logic, plotting
 import config
 
-status: AlertsStatus = {"monitor": False, "boats": {}, "aircrafts": {}}
+status: AlertsStatus = {"monitor": False, "boats": {}, "aircraft": {}}
 boats_df: pd.DataFrame
-aircrafts_df: pd.DataFrame
+aircraft_df: pd.DataFrame
 
 boats_snapshot_df = pd.DataFrame()
-aircrafts_snapshot_df = pd.DataFrame()
+aircraft_snapshot_df = pd.DataFrame()
 
 
 def reload_dataframes():
     global boats_df
-    global aircrafts_df
+    global aircraft_df
     global boats_snapshot_df
-    global aircrafts_snapshot_df
+    global aircraft_snapshot_df
 
-    boats_df, aircrafts_df = processing.load_dataframes()
+    boats_df, aircraft_df = processing.load_dataframes()
 
     # Snapshot of latest position reports
     boats_snapshot_df = processing.snapshot(boats_df, stale=timedelta(minutes=15))
-    aircrafts_snapshot_df = processing.snapshot(
-        aircrafts_df, stale=timedelta(minutes=15)
-    )
+    aircraft_snapshot_df = processing.snapshot(aircraft_df, stale=timedelta(minutes=15))
 
 
 def dump_status():
@@ -50,14 +48,14 @@ def dispatch_message(message, image=None):
     webhook.execute()
 
 
-def check_aircrafts():
-    """Check aircrafts"""
+def check_aircraft():
+    """Check aircraft"""
     global status
 
 
 def update_tracked_boats():
     """Update tracked boats in status to latest snapshot"""
-    global boats_snapshot_df, aircrafts_snapshot_df, status
+    global boats_snapshot_df, aircraft_snapshot_df, status
     mmsis = [m["mmsi"] for m in status["boats"]]
 
     processing.tracked_vessels = processing.tracked_vessels(
@@ -70,7 +68,7 @@ def update_tracked_boats():
     # def update_regions():
     #     """This junk needs to die!"""
     #     """Updates the regions in the global statuses"""
-    #     global boats_snapshot_df, aircrafts_snapshot_df, status
+    #     global boats_snapshot_df, aircraft_snapshot_df, status
     #     regions = config.regions
     #     for mmsi in status["boats"].keys():
     #         boat_status = status["boats"][mmsi]
@@ -105,13 +103,13 @@ def update_tracked_boats():
 
 def generate_map(filename):
     global boats_df
-    global aircrafts_df
+    global aircraft_df
     global status
     boats = processing.newer_than(boats_df, datetime.now() - timedelta(minutes=60))
-    aircrafts = processing.newer_than(
-        aircrafts_df, datetime.now() - timedelta(minutes=60)
+    aircraft = processing.newer_than(
+        aircraft_df, datetime.now() - timedelta(minutes=60)
     )
-    fig = plotting.plot_scene(config.arena, boats, aircrafts, status)
+    fig = plotting.plot_scene(config.arena, boats, aircraft, status)
     fig.write_image(filename)
 
 
@@ -137,10 +135,10 @@ def set_monitor():
     """
     global status
     global boats_snapshot_df
-    global aircrafts_snapshot_df
+    global aircraft_snapshot_df
 
     # Any aircraft enables monitoring
-    if len(aircrafts_snapshot_df) > 0:
+    if len(aircraft_snapshot_df) > 0:
         if status["monitor"] == True:
             # Aircraft present but already monitoring
             return
@@ -172,8 +170,8 @@ def initilise_statuses() -> None:
     global status
     for boat in config.tracked_boats:
         mmsi = int(boat["mmsi"])
-        name = boat["name"]
-        color = boat["color"]
+        name = str(boat["name"])
+        color = str(boat["color"])
 
         boat_status: BoatStatus = {
             "mmsi": mmsi,

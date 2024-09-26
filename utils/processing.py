@@ -118,16 +118,20 @@ def tracked_vessels(vessels: pd.DataFrame, tracking_vessels: list) -> pd.DataFra
 
 
 def load_dataframes(
-    boats_log_file=config.boats_log_file, aircrafts_log_file=config.aircrafts_log_file
+    boats_log_file=config.boats_log_file, aircraft_log_file=config.aircraft_log_file
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """A helper to load both boat and aircraft log dataframe
 
     Returns a tuple of both dataframes
     """
     boats = pd.read_csv(boats_log_file)
-    aircrafts = pd.read_csv(aircrafts_log_file)
+    aircraft = pd.read_csv(aircraft_log_file)
 
-    boats["server_timestamp"] = pd.to_datetime(boats["server_timestamp"])
-    aircrafts["server_timestamp"] = pd.to_datetime(aircrafts["server_timestamp"])
+    boats["server_timestamp"] = pd.to_datetime(
+        boats["server_timestamp"], format="ISO8601"
+    )
+    aircraft["server_timestamp"] = pd.to_datetime(
+        aircraft["server_timestamp"], format="ISO8601"
+    )
 
-    return (boats, aircrafts)
+    return (boats, aircraft)

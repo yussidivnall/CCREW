@@ -33,8 +33,8 @@ def prepare_boats_dataframe(boats: pd.DataFrame) -> pd.DataFrame:
     return boats
 
 
-def prepare_aircrafts_dataframe(aircrafts: pd.DataFrame) -> pd.DataFrame:
-    """Preprocess the aircrafts dataframe from log to presentation
+def prepare_aircraft_dataframe(aircraft: pd.DataFrame) -> pd.DataFrame:
+    """Preprocess the aircraft dataframe from log to presentation
     - Remove entries older then 15 minutes
     - sorts
     - add colour column
@@ -42,9 +42,9 @@ def prepare_aircrafts_dataframe(aircrafts: pd.DataFrame) -> pd.DataFrame:
 
     return dataframe to graph
     """
-    aircrafts = processing.tail_log(aircrafts)
-    aircrafts["color"] = "blue"
-    return aircrafts
+    aircraft = processing.tail_log(aircraft)
+    aircraft["color"] = "blue"
+    return aircraft
 
 
 def load_boats() -> pd.DataFrame:
@@ -56,24 +56,24 @@ def load_boats() -> pd.DataFrame:
     return boats_df
 
 
-def load_aircrafts() -> pd.DataFrame:
-    aircrafts_logfile = config.aircrafts_log_file
+def load_aircraft() -> pd.DataFrame:
+    aircraft_logfile = config.aircraft_log_file
     # aircraft_logfile = "aircraft.log.csv"
-    aircrafts_df = pd.read_csv(
-        aircrafts_logfile
+    aircraft_df = pd.read_csv(
+        aircraft_logfile
     )  # , dtype={"server_timestamp": datetime})
-    aircrafts_df = processing.fix_datetime_columns(aircrafts_df)
-    aircrafts_df = prepare_aircrafts_dataframe(aircrafts_df)
-    return aircrafts_df
+    aircraft_df = processing.fix_datetime_columns(aircraft_df)
+    aircraft_df = prepare_aircraft_dataframe(aircraft_df)
+    return aircraft_df
 
 
 def draw():
     boats_df = load_boats()
-    aircraft_df = load_aircrafts()
+    aircraft_df = load_aircraft()
 
     # latest state of all boats
     boats_snapshot_df = processing.snapshot(boats_df)
-    aircrafts_snapshot_df = processing.snapshot(aircraft_df)
+    aircraft_snapshot_df = processing.snapshot(aircraft_df)
 
     # latest_boat_positions_df = processing.latest_states(boats_df.copy())
     tracked_boats_df = processing.tracked_vessels(boats_df, config.tracked_boats)
@@ -89,11 +89,11 @@ def draw():
 
 def create_figure():
     boats_df = load_boats()
-    aircraft_df = load_aircrafts()
+    aircraft_df = load_aircraft()
 
     # latest state of all boats
     boats_snapshot_df = processing.snapshot(boats_df)
-    aircrafts_snapshot_df = processing.snapshot(aircraft_df)
+    aircraft_snapshot_df = processing.snapshot(aircraft_df)
 
     # latest_boat_positions_df = processing.latest_states(boats_df.copy())
     tracked_boats_df = processing.tracked_vessels(boats_df, config.tracked_boats)
@@ -112,11 +112,11 @@ def create_figure():
 
 def update_figure():
     boats_df = load_boats()
-    aircraft_df = load_aircrafts()
+    aircraft_df = load_aircraft()
 
     # latest state of all boats
     boats_snapshot_df = processing.snapshot(boats_df)
-    aircrafts_snapshot_df = processing.snapshot(aircraft_df)
+    aircraft_snapshot_df = processing.snapshot(aircraft_df)
 
     # latest tracked
     tracked_boats_df = processing.tracked_vessels(boats_df, config.tracked_boats)

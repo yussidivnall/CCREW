@@ -142,7 +142,7 @@ def vessel_path_trace(group, symbol="circle", color="gray"):
 def plot_scene(
     arena,
     boats: pd.DataFrame,
-    aircrafts: pd.DataFrame,
+    aircraft: pd.DataFrame,
     status: AlertsStatus,
     zoom: int = 8.2,
 ) -> Figure:
@@ -150,7 +150,7 @@ def plot_scene(
 
     plots all boats last known position (TODO)
     plots tracked boats path
-    plots aircrafts path
+    plots aircraft path
     """
     arena_bounds = {
         "east": arena[0][0][1],
@@ -196,8 +196,8 @@ def plot_scene(
         fig.add_trace(trace)
         label = label_trace(group, color)
         fig.add_trace(label)
-    # Trace all aircrafts
-    for mmsi, group in aircrafts.groupby("mmsi"):
+    # Trace all aircraft
+    for mmsi, group in aircraft.groupby("mmsi"):
         trace = vessel_path_trace(group, symbol="triangle")
         name = f"Aircraft {mmsi}"
         trace.name = name

@@ -8,9 +8,9 @@ from utils import processing, plotting
 def test_monitoring_map():
     arena = [[[51.399, 2.2666], [50.85, 0.639]]]
 
-    boats_df, aircrafts_df = processing.load_dataframes(
+    boats_df, aircraft_df = processing.load_dataframes(
         "tests/data/boats.log.csv",
-        "tests/data/aircrafts.log.csv",
+        "tests/data/aircraft.log.csv",
     )
     status: AlertsStatus = {
         "monitor": False,
@@ -48,17 +48,17 @@ def test_monitoring_map():
                 "color": "green",
             },
         },
-        "aircrafts": {},
+        "aircraft": {},
     }
 
     boats_df = processing.newer_than(boats_df, datetime(2024, 7, 8))
-    aircrafts_df = processing.newer_than(aircrafts_df, datetime(2024, 8, 17))
+    aircraft_df = processing.newer_than(aircraft_df, datetime(2024, 8, 17))
 
     # boats_snapshot_df = processing.snapshot(boats_df)
-    # aircrafts_snapshot_df = processing.snapshot(aircrafts_df)
+    # aircraft_snapshot_df = processing.snapshot(aircraft_df)
     # fig = plotting.plot_map(boats_snapshot_df, arena=arena)
 
-    fig = plotting.plot_scene(arena, boats_df, aircrafts_df, status)
+    fig = plotting.plot_scene(arena, boats_df, aircraft_df, status)
     fig.write_image("/tmp/fig.png")
     fig.show()
     print("Noooo")

@@ -64,7 +64,7 @@ The Arena defines two points on a map, this is the area we will monitor, you can
 
 ## Utilities
 
-running `python track.py` will begin the monitoring service. it will create two csv files in the `data/` directory, each showing a log of postion reports for boats and for Search and Rescue aircrafts.
+running `python track.py` will begin the monitoring service. it will create two csv files in the `data/` directory, each showing a log of position reports for boats and for Search and Rescue aircraft.
 
 Once this is running, you can use `python app.py` to start a dash server, you should then be able to browse to http://localhost:8050 and see an updating map of the vessels in the region we defined above.
 

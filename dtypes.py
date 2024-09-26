@@ -70,7 +70,7 @@ class AircraftStatus(TypedDict):
 class AlertsStatus(TypedDict):
     monitor: bool
     boats: Dict[int, BoatStatus]
-    aircrafts: Dict[int, AircraftStatus]
+    aircraft: Dict[int, AircraftStatus]
 
 
 class Region(TypedDict):

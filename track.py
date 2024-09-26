@@ -74,7 +74,7 @@ def update(message):
         record = parse_sar_aircraft_report(message)
         print(f"Aircraft {record}")
         if update_check(state["aircraft"], record):
-            add_to_log(config.aircrafts_log_file, record)
+            add_to_log(config.aircraft_log_file, record)
 
 
 async def connect_ais_stream():
@@ -118,10 +118,10 @@ def initialise():
         with open(config.boats_log_file, mode="a", newline="") as f:
             writer = csv.DictWriter(f, headers)
             writer.writeheader()
-    if not Path(config.aircrafts_log_file).is_file():
-        logging.info(f" creating csv logfile {config.aircrafts_log_file}")
+    if not Path(config.aircraft_log_file).is_file():
+        logging.info(f" creating csv logfile {config.aircraft_log_file}")
         headers = AircraftPosition.__annotations__.keys()
-        with open(config.aircrafts_log_file, mode="a", newline="") as f:
+        with open(config.aircraft_log_file, mode="a", newline="") as f:
             writer = csv.DictWriter(f, headers)
             writer.writeheader()
 

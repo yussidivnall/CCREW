@@ -12,7 +12,7 @@ record_all = False
 update_interval = 15
 
 boats_log_file = "data/boats.log.csv"
-aircrafts_log_file = "data/aircrafts.log.csv"
+aircraft_log_file = "data/aircraft.log.csv"
 
 images_directory = "images/"
 
@@ -20,6 +20,7 @@ tracked_boats = [
     {
         "mmsi": 1234,
         "name": "Boat name",
+        "label": "Label",
         "color": "red"
     },
 ]

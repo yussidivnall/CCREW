@@ -1,3 +1,4 @@
+import os
 import asyncio
 import logging
 import threading
@@ -15,18 +16,7 @@ def alert_job(loop):
     loop.run_until_complete(alert.run())
 
 
-# Application Factory
-def create_app(config_name=None):
-    """
-    Application factory function for creating a Flask app instance.
-
-    Args:
-        config_name (str): The configuration name to use (e.g., 'development', 'production').
-
-    Returns:
-        app (Flask): The Flask app instance.
-    """
-    app = Flask(__name__)
+def background_jobs():
     # Track vessels and update CSVs
     tracking_loop = asyncio.new_event_loop()
     tracking_thread = threading.Thread(target=track_job, args=(tracking_loop,))
@@ -39,15 +29,34 @@ def create_app(config_name=None):
     alerting_thread.daemon = True
     alerting_thread.start()
 
+
+# Application Factory
+def create_app(config_name=None):
+    """
+    Application factory function for creating a Flask app instance.
+
+    Args:
+        config_name (str): The configuration name to use (e.g., 'development', 'production').
+
+    Returns:
+        app (Flask): The Flask app instance.
+    """
+    app = Flask(__name__)
+
+    # Only start background jobs once in the main thread (debug starts it twice)
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        background_jobs()
+
     @app.route("/health")
     def health():
         return {"updated": track.state["last_updated"]}
 
     @app.route("/snapshot")
     def snapshot():
-        alert.generate_map("snapshot.png")
+        filename = "snapshot.png"
+        alert.generate_map(filename)
         alert.dispatch_message(
-            message=f"{track.state['last_updated']} - Snapshot", image="snapshot.png"
+            message=f"{track.state['last_updated']} - Snapshot", image=filename
         )
         return {}
 
@@ -57,4 +66,5 @@ def create_app(config_name=None):
 # Main function to run the app
 if __name__ == "__main__":
     app = create_app("development")
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    debug_mode = os.environ.get("FLASK_DEBUG", "0") == "1"
+    app.run(host="0.0.0.0", port=5000, debug=debug_mode)
