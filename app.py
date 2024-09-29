@@ -4,7 +4,7 @@ import logging
 import threading
 from flask import Flask
 import track
-import alert
+from alert import alert
 
 
 def track_job(loop):

@@ -1,5 +1,8 @@
+from dataclasses import dataclass
 from typing import TypedDict, Dict, Optional
 from datetime import datetime
+from typing_extensions import NotRequired
+from alert import rules
 
 
 class BoatPosition(TypedDict):
@@ -51,18 +54,26 @@ class AircraftPosition(TypedDict):
     valid: bool
 
 
-class BoatStatus(TypedDict):
+@dataclass
+class BoatStatus:
     mmsi: int
     name: str
     color: str
-    in_regions: list[str]
-    online: bool
-    home: Optional[str]
+    online: bool = False
+    lat: NotRequired[float | None] = None
+    lon: NotRequired[float | None] = None
+    speed: NotRequired[float | None] = None
+    in_regions: NotRequired[list[str] | None] = None
+    home: NotRequired[str | None] = None
+    alerts: NotRequired[list[rules.AlertRule] | None] = None
 
 
 class AircraftStatus(TypedDict):
     mmsi: int
     name: str
+    lat: float
+    lon: float
+    speed: float
     in_regions: list[str]
     online: bool
 

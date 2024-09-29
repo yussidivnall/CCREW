@@ -1,16 +1,18 @@
-import os
-from datetime import timedelta, datetime
+from typing import cast
 import json
 import logging
-import schedule
+import os
 import time
+from datetime import datetime, timedelta
+
 import pandas as pd
+import schedule
 from discord_webhook import DiscordWebhook
 
-
-from dtypes import BoatStatus, Region, AlertsStatus
-from utils import processing, logic, plotting
 import config
+from alert.rules import AlertRule
+from dtypes import AlertsStatus, BoatStatus, Region
+from utils import logic, plotting, processing
 
 status: AlertsStatus = {"monitor": False, "boats": {}, "aircraft": {}}
 boats_df: pd.DataFrame
@@ -46,59 +48,6 @@ def dispatch_message(message, image=None):
         with open(image, "rb") as f:
             webhook.add_file(f.read(), filename="monitoring.png")
     webhook.execute()
-
-
-def check_aircraft():
-    """Check aircraft"""
-    global status
-
-
-def update_tracked_boats():
-    """Update tracked boats in status to latest snapshot"""
-    global boats_snapshot_df, aircraft_snapshot_df, status
-    mmsis = [m["mmsi"] for m in status["boats"]]
-
-    processing.tracked_vessels = processing.tracked_vessels(
-        boats_snapshot_df, status["boats"]
-    )
-
-    # tracked_boats = boats_snapshot_df[boats_snapshot_df[] ]
-    pass
-
-    # def update_regions():
-    #     """This junk needs to die!"""
-    #     """Updates the regions in the global statuses"""
-    #     global boats_snapshot_df, aircraft_snapshot_df, status
-    #     regions = config.regions
-    #     for mmsi in status["boats"].keys():
-    #         boat_status = status["boats"][mmsi]
-    #         if "home" in boat_status.keys():
-    #             home_key = boat_status["home"]
-    #             home_region = regions[home_key]
-    #
-    #         boat_snapshot = boats_snapshot_df[boats_snapshot_df.mmsi == mmsi].iloc[0]
-    #         # lat, lon = boat[["lat", "lon"]]
-    #         for region_key in regions:
-    #             region: Region = regions[region_key]
-    #             in_region = logic.boat_in_region(boat_snapshot, region)
-    #             if in_region:
-    #                 # Boat is in region, check is it's in boat_status[region], If it is continue
-    #                 # If not, add to boat_status[regions] and dispatch message "Boat entered _region_.
-    #
-    #                 if region_key in boat_status["in_regions"]:
-    #                     # Region already in status, do nothing
-    #                     continue
-    #                 else:
-    #                     boat_status["in_regions"].append(region_key)
-    #                     dispatch_message(f"Boat {boat_status['name']} entered {region_key}")
-    #                 pass
-    #             else:
-    #                 # If boat not in region
-    #                 # Check if region is in boat_status['region'],
-    #                 # if so dispatch message "boat has left region", and remove from regions
-    #                 if region_key in boat_status["in_regions"]:
-    #                     boat_status["in_regions"].remove(region_key)
-    #                     dispatch_message(f"Boat {boat_status['name']} left {region_key}")
 
 
 def generate_map(filename):
@@ -146,7 +95,7 @@ def set_monitor():
             status["monitor"] = True
             filename = os.path.join(config.images_directory, "enabled.png")
             generate_map(filename)
-            dispatch_message("Aircraft pesent in secene, enabling monitoring", filename)
+            dispatch_message("Aircraft pesent in scene, enabling monitoring", filename)
             return
     # For all boat statuses
     # If any boat is not home, as in if boat_status["home"] not in boat_status["regions"]
@@ -161,25 +110,25 @@ def set_monitor():
         dispatch_message("Disabling monitoring")
 
 
-def check_offline():
-    # Check if boat has not transmitted for a period, if not, dispatch message and se
-    pass
-
-
 def initilise_statuses() -> None:
     global status
     for boat in config.tracked_boats:
-        mmsi = int(boat["mmsi"])
-        name = str(boat["name"])
-        color = str(boat["color"])
+        mmsi = cast(int, boat["mmsi"])
+        name = cast(str, boat["name"])
+        color = cast(str, boat["color"])
+        alerts: list[AlertRule] = []
+        if "alerts" in boat and isinstance(boat["alerts"], list):
+            for a in boat["alerts"]:
+                alert = {**a, "raised": False}
+                alerts.append(cast(AlertRule, alert))
 
         boat_status: BoatStatus = {
-            "mmsi": mmsi,
             "name": name,
+            "mmsi": mmsi,
             "color": color,
-            "in_regions": [],
             "online": False,
             "home": None,
+            "alerts": alerts,
         }
         status["boats"][mmsi] = boat_status
 
