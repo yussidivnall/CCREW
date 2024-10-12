@@ -11,10 +11,10 @@ from discord_webhook import DiscordWebhook
 
 import config
 from alert.rules import AlertRule
-from dtypes import AlertsStatus, BoatStatus, Region
+from dtypes import Status, BoatStatus, Region
 from utils import logic, plotting, processing
 
-status: AlertsStatus = {"monitor": False, "boats": {}, "aircraft": {}}
+status = Status()
 boats_df: pd.DataFrame
 aircraft_df: pd.DataFrame
 
@@ -65,7 +65,7 @@ def generate_map(filename):
 def monitor_job():
     """Check if status.monitor is set and post update"""
     global status
-    if not status["monitor"]:
+    if not status.monitor:
         return
 
     filename = os.path.join(config.images_directory, "monitoring.png")
@@ -77,60 +77,71 @@ def monitor_job():
     # pass
 
 
+def tracked_boat_alerts():
+    global status
+    global boats_snapshot_df
+    for boat in status.boats:
+        mmsi = boat.mmsi
+        for alert in boat.alerts:
+            pass
+    #
+    #    # for boat_status in status["
+
+
 def set_monitor():
     """Perform logic to enable and disable status.monitor
 
-    if aircraft active, or BF boats outside port set to True and return, otherwise False
+    any boat that has actions defined is raised return true
+    if aircraft active, set to True and return, otherwise False
     """
     global status
     global boats_snapshot_df
     global aircraft_snapshot_df
 
+    tracked_boat_alerts()
     # Any aircraft enables monitoring
     if len(aircraft_snapshot_df) > 0:
-        if status["monitor"] == True:
+        if status.monitor == True:
             # Aircraft present but already monitoring
             return
         else:
-            status["monitor"] = True
+            status.monitor = True
             filename = os.path.join(config.images_directory, "enabled.png")
             generate_map(filename)
             dispatch_message("Aircraft pesent in scene, enabling monitoring", filename)
             return
-    # For all boat statuses
-    # If any boat is not home, as in if boat_status["home"] not in boat_status["regions"]
-    # set status_monitor to true
-    # if any plane is active set status monitor to true
 
     # No alerts
-    if status["monitor"] is False:
+    if status.monitor is False:
         return
     else:
-        status["monitor"] = False
+        status.monitor = False
         dispatch_message("Disabling monitoring")
 
 
-def initilise_statuses() -> None:
+def update_statuses() -> None:
+    global status
+    global boats_snapshot_df
+    for boat in status.boats:
+        print(f"boat status {boat.mmsi} - {boat.name}")
+        mmsi = boat.mmsi
+        row = boats_snapshot_df[boats_snapshot_df[mmsi] == mmsi]
+        print(row)
+        pass
+
+
+def initialise_statuses() -> None:
+    # Load tracked boats from config and initialise
     global status
     for boat in config.tracked_boats:
-        mmsi = cast(int, boat["mmsi"])
-        name = cast(str, boat["name"])
-        color = cast(str, boat["color"])
-        alerts: list[AlertRule] = []
-        if "alerts" in boat and isinstance(boat["alerts"], list):
-            for a in boat["alerts"]:
-                alert = {**a, "raised": False}
-                alerts.append(cast(AlertRule, alert))
-
-        boat_status: BoatStatus = {
-            "name": name,
-            "mmsi": mmsi,
-            "color": color,
-            "online": False,
-            "home": None,
-            "alerts": alerts,
-        }
-        status["boats"][mmsi] = boat_status
+        mmsi = int(boat["mmsi"])
+        name = str(boat["name"])
+        color = str(boat["color"])
+        boat_status = BoatStatus(mmsi=mmsi, name=name, color=color)
+        if "alerts" in boat:
+            alerts: list[AlertRule] = [AlertRule(**ar) for ar in boat["alerts"]]
+            boat_status.alerts = alerts
+        status.boats.append(boat_status)
 
 
 def schedule_tasks():
@@ -141,7 +152,7 @@ def schedule_tasks():
 
 async def run():
     reload_dataframes()
-    initilise_statuses()
+    initialise_statuses()
     schedule_tasks()
     while True:
         schedule.run_pending()
@@ -150,7 +161,7 @@ async def run():
 
 def main():
     reload_dataframes()
-    initilise_statuses()
+    initialise_statuses()
     schedule.every(15).seconds.do(reload_dataframes)
     schedule.every(30).seconds.do(set_monitor)
     schedule.every(900).seconds.do(monitor_job)  # should be every 15 minutes

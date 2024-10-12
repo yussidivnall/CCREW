@@ -4,7 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.graph_objects import Figure, Scattergeo, Scattermapbox
 
-from dtypes import AlertsStatus
+from dtypes import Status
 from utils import processing
 
 
@@ -143,7 +143,7 @@ def plot_scene(
     arena,
     boats: pd.DataFrame,
     aircraft: pd.DataFrame,
-    status: AlertsStatus,
+    status: Status,
     zoom: int = 8.2,
 ) -> Figure:
     """Plots the scene for alerts

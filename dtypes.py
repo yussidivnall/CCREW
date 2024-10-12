@@ -1,11 +1,12 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TypedDict, Dict, Optional
 from datetime import datetime
 from typing_extensions import NotRequired
 from alert import rules
 
 
-class BoatPosition(TypedDict):
+@dataclass
+class BoatPosition:
     server_timestamp: datetime
     time_utc: str
     mmsi: int
@@ -28,7 +29,8 @@ class BoatPosition(TypedDict):
     valid: bool
 
 
-class AircraftPosition(TypedDict):
+@dataclass
+class AircraftPosition:
     server_timestamp: datetime
     time_utc: str
     mmsi: int
@@ -60,15 +62,16 @@ class BoatStatus:
     name: str
     color: str
     online: bool = False
-    lat: NotRequired[float | None] = None
-    lon: NotRequired[float | None] = None
-    speed: NotRequired[float | None] = None
-    in_regions: NotRequired[list[str] | None] = None
-    home: NotRequired[str | None] = None
-    alerts: NotRequired[list[rules.AlertRule] | None] = None
+    lat: float | None = None
+    lon: float | None = None
+    speed: float | None = None
+    in_regions: list[str] | None = None
+    home: str | None = None
+    alerts: list[rules.AlertRule] | None = None
 
 
-class AircraftStatus(TypedDict):
+@dataclass
+class AircraftStatus:
     mmsi: int
     name: str
     lat: float
@@ -78,13 +81,20 @@ class AircraftStatus(TypedDict):
     online: bool
 
 
-class AlertsStatus(TypedDict):
-    monitor: bool
-    boats: Dict[int, BoatStatus]
-    aircraft: Dict[int, AircraftStatus]
+@dataclass
+class Status:
+    monitor: bool = False
+    boats: list[BoatStatus] = field(default_factory=list)
+    aircraft: list[AircraftStatus] = field(default_factory=list)
+
+    def __init__(self, monitor=False, boats=[], aircraft=[]):
+        self.monitor = monitor
+        self.boats = boats
+        self.aircraft = aircraft
 
 
-class Region(TypedDict):
+@dataclass
+class Region:
     lat: list[float]
     lon: list[float]
     name: str

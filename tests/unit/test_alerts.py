@@ -3,71 +3,161 @@ from unittest.mock import Mock, patch
 import pandas as pd
 from pandas.core.api import DataFrame
 import pytest
-
 from alert import alert
-from dtypes import AlertsStatus, BoatStatus, Region
+from alert.rules import AlertRule
+from dtypes import Status, BoatStatus, Region
 
 
-def mock_boats_df():
-    ret = pd.DataFrame({"mmsi": [123, 456], "lat": [51.5, 51.328], "lon": [0.0, 1.421]})
-    return ret
+def test_initialised_statuses():
+    # Empty tracked boat list
+    alert.config.tracked_boats = []
+    alert.initialise_statuses()
+    assert alert.status.boats == []
+
+    # tracked boat list missing keys
+    alert.config.tracked_boats = [{}]
+    with pytest.raises(KeyError) as kerr:
+        alert.initialise_statuses()
+    assert kerr.match("^'mmsi'$")
+    assert alert.status.boats == []
+
+    alert.config.tracked_boats = [{"mmsi": 1234, "name": "Shmulik", "color": "red"}]
+    alert.initialise_statuses()
+    assert alert.status.boats == [
+        BoatStatus(
+            mmsi=1234,
+            name="Shmulik",
+            color="red",
+            online=False,
+            lat=None,
+            lon=None,
+            speed=None,
+            in_regions=None,
+            home=None,
+            alerts=None,
+        ),
+    ]
 
 
-def mock_boats_snapshot_df():
-    boats_snapshot_df = pd.DataFrame(
-        {"mmsi": [123, 456], "lat": [51.5, 51.328], "lon": [0.0, 1.421]}
-    )
-    return boats_snapshot_df
+def test_initialised_statuses_with_boat_empty_alert_rules():
+    # boat_alert = AlertRule(name="test rule", enable="speed > 10", disable="speed < 3")
+    alert.status = Status()
+    alert.config.tracked_boats = [
+        {"mmsi": 1234, "name": "Shmulik", "color": "red", "alerts": []}
+    ]
+    alert.initialise_statuses()
+    assert alert.status.boats == [
+        BoatStatus(
+            mmsi=1234,
+            name="Shmulik",
+            color="red",
+            online=False,
+            lat=None,
+            lon=None,
+            speed=None,
+            in_regions=None,
+            home=None,
+            alerts=[],
+        ),
+    ]
 
 
-def mock_aircraft_snapshot_df():
-    aircraft_snapshot_df: pd.DataFrame = pd.DataFrame(
-        {"mmsi": [123, 456], "lat": [51.5, 51.328], "lon": [0.0, 1.421]}
-    )
-    return aircraft_snapshot_df
-
-
-def mock_regions():
-    regions = {
-        "port": {
-            "lat": [51.333369, 51.329196, 51.327212, 51.330014],
-            "lon": [1.422637, 1.425542, 1.420174, 1.416394],
-            "name": "Ramsgate port",
+def test_initialised_statuses_with_boat_alert_rules():
+    # boat_alert = AlertRule(name="test rule", enable="speed > 10", disable="speed < 3")
+    alert.status = Status()
+    alert.config.tracked_boats = [
+        {
+            "mmsi": 1234,
+            "name": "Shmulik",
+            "color": "red",
+            "alerts": [
+                {"name": "test_rule", "enable": "speed>10", "disable": "speed<3"}
+            ],
         }
-    }
-    return regions
+    ]
+    alert.initialise_statuses()
+    assert alert.status.boats == [
+        BoatStatus(
+            mmsi=1234,
+            name="Shmulik",
+            color="red",
+            online=False,
+            lat=None,
+            lon=None,
+            speed=None,
+            in_regions=None,
+            home=None,
+            alerts=[AlertRule(name="test_rule", enable="speed>10", disable="speed<3")],
+        ),
+    ]
 
 
-def mock_dispatch(message):
-    print(message)
+def test_update_boat_alerts():
+    pass
 
 
-def mock_status():
-    status: AlertsStatus = {
-        "monitor": False,
-        "boats": {
-            123: {
-                "mmsi": 123,
-                "name": "Boat A",
-                "in_regions": [],
-                "online": True,
-                "home": "port",
-                "color": "red",
-            },
-            456: {
-                "mmsi": 456,
-                "name": "Boat B",
-                "in_regions": [],
-                "online": True,
-                "home": None,
-                "color": "blue",
-            },
-        },
-        "aircraft": {},
-    }
-    return status
-
-
+# def mock_boats_df():
+#     ret = pd.DataFrame({"mmsi": [123, 456], "lat": [51.5, 51.328], "lon": [0.0, 1.421]})
+#     return ret
+#
+#
+# def mock_boats_snapshot_df():
+#     boats_snapshot_df = pd.DataFrame(
+#         {"mmsi": [123, 456], "lat": [51.5, 51.328], "lon": [0.0, 1.421]}
+#     )
+#     return boats_snapshot_df
+#
+#
+# def mock_aircraft_snapshot_df():
+#     aircraft_snapshot_df: pd.DataFrame = pd.DataFrame(
+#         {"mmsi": [123, 456], "lat": [51.5, 51.328], "lon": [0.0, 1.421]}
+#     )
+#     return aircraft_snapshot_df
+#
+#
+# def mock_regions():
+#     regions = {
+#         "port": {
+#             "lat": [51.333369, 51.329196, 51.327212, 51.330014],
+#             "lon": [1.422637, 1.425542, 1.420174, 1.416394],
+#             "name": "Ramsgate port",
+#         }
+#     }
+#     return regions
+#
+#
+# def mock_dispatch(message):
+#     print(message)
+#
+#
+# def mock_status():
+#     status: AlertsStatus = {
+#         "monitor": False,
+#         "boats": {
+#             123: {
+#                 "mmsi": 123,
+#                 "name": "Boat A",
+#                 "in_regions": [],
+#                 "online": True,
+#                 "home": "port",
+#                 "color": "red",
+#             },
+#             456: {
+#                 "mmsi": 456,
+#                 "name": "Boat B",
+#                 "in_regions": [],
+#                 "online": True,
+#                 "home": None,
+#                 "color": "blue",
+#             },
+#         },
+#         "aircraft": {},
+#     }
+#     return status
+#
+#
+#
+#
 # Junk, superseded by
 # @patch("alert.aircraft_snapshot_df", mock_aircraft_snapshot_df())
 # @patch("alert.boats_snapshot_df", mock_boats_snapshot_df())

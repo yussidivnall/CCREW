@@ -1,6 +1,6 @@
 from datetime import datetime
 from unittest.mock import patch
-from dtypes import AlertsStatus
+from dtypes import Status, BoatStatus
 from utils import processing, plotting
 
 
@@ -12,44 +12,42 @@ def test_monitoring_map():
         "tests/data/boats.log.csv",
         "tests/data/aircraft.log.csv",
     )
-    status: AlertsStatus = {
-        "monitor": False,
-        "boats": {
-            235118075: {
-                "mmsi": 235118075,
-                "name": "BF HURRICANE",
-                "in_regions": [],
-                "online": True,
-                "home": None,
-                "color": "#00FF00",
-            },
-            235102528: {
-                "mmsi": 235102528,
-                "name": "BF VOLUNTEER",
-                "in_regions": [],
-                "online": True,
-                "home": None,
-                "color": "yellow",
-            },
-            235098051: {
-                "mmsi": 235098051,
-                "name": "BF DEFENDER",
-                "in_regions": [],
-                "online": True,
-                "home": None,
-                "color": "red",
-            },
-            235103844: {
-                "mmsi": 235103844,
-                "name": "BF RANGER",
-                "in_regions": [],
-                "online": True,
-                "home": None,
-                "color": "green",
-            },
-        },
-        "aircraft": {},
-    }
+    status = Status()
+    status.monitor = False
+    status.boats = [
+        BoatStatus(
+            mmsi=235118075,
+            name="BF HURRICANE",
+            in_regions=[],
+            online=True,
+            home=None,
+            color="#00FF00",
+        ),
+        BoatStatus(
+            mmsi=235102528,
+            name="BF VOLUNTEER",
+            in_regions=[],
+            online=True,
+            home=None,
+            color="yellow",
+        ),
+        BoatStatus(
+            mmsi=235098051,
+            name="BF DEFENDER",
+            in_regions=[],
+            online=True,
+            home=None,
+            color="red",
+        ),
+        BoatStatus(
+            mmsi=235103844,
+            name="BF RANGER",
+            in_regions=[],
+            online=True,
+            home=None,
+            color="green",
+        ),
+    ]
 
     boats_df = processing.newer_than(boats_df, datetime(2024, 7, 8))
     aircraft_df = processing.newer_than(aircraft_df, datetime(2024, 8, 17))
