@@ -123,10 +123,8 @@ def update_statuses() -> None:
     global status
     global boats_snapshot_df
     for boat in status.boats:
-        print(f"boat status {boat.mmsi} - {boat.name}")
         mmsi = boat.mmsi
         row = boats_snapshot_df[boats_snapshot_df[mmsi] == mmsi]
-        print(row)
         pass
 
 
@@ -141,6 +139,9 @@ def initialise_statuses() -> None:
         if "alerts" in boat:
             alerts: list[AlertRule] = [AlertRule(**ar) for ar in boat["alerts"]]
             boat_status.alerts = alerts
+        else:
+            boat_status.alerts = []
+        logging.info("adding: {}", boat_status)
         status.boats.append(boat_status)
 
 

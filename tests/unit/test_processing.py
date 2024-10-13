@@ -88,6 +88,14 @@ def test_sieve():
             datetime(2024, 1, 1, 0, 0, 49),
         ],
         "mmsi": [1, 1, 1, 2, 2, 2],
+        "ship_name": [
+            "ONE",
+            "ONE",
+            "ONE",
+            "TWO",
+            "TWO",
+            "TWO",
+        ],
     }
     df = pd.DataFrame(d)
     e = {
@@ -98,6 +106,7 @@ def test_sieve():
             datetime(2024, 1, 1, 0, 0, 49),
         ],
         "mmsi": [1, 1, 2, 2],
+        "ship_name": ["ONE", "ONE", "TWO", "TWO"],
     }
     expected_df = pd.DataFrame(e)
 

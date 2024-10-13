@@ -1,4 +1,5 @@
 from datetime import timedelta
+import logging
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -144,7 +145,7 @@ def plot_scene(
     boats: pd.DataFrame,
     aircraft: pd.DataFrame,
     status: Status,
-    zoom: int = 8.2,
+    zoom: float = 8.2,
 ) -> Figure:
     """Plots the scene for alerts
 
@@ -184,17 +185,26 @@ def plot_scene(
     boats_snapshot_trace = vessel_snapshot_trace(boats)
     fig.add_trace(boats_snapshot_trace)
     # Trace for tracked boats
-    tracked_boats_mmsis = [m for m in status["boats"]]
+    tracked_boats_mmsis = [m.mmsi for m in status.boats]
     tracked_boats = processing.filter_mmsis(boats, tracked_boats_mmsis)
     tracked_boats = processing.sieve_timedelta(tracked_boats, timedelta(seconds=60))
-    for mmsi, group in tracked_boats.groupby("mmsi"):
-        m = pd.to_numeric(mmsi)
-        name = status["boats"][int(m)]["name"]
-        color = status["boats"][int(m)]["color"]
-        trace = vessel_path_trace(group, color=color)
+    for idx, boat in tracked_boats.groupby(["mmsi", "ship_name"]):
+        print(idx)
+        print()
+        mmsi = int(idx[0])
+        name = str(idx[1]).strip()
+        boat_status = status.get_boat(mmsi, name)
+        if not boat_status:
+            logging.error(
+                f"boat {mmsi} - {name} not found in status object, not adding trace, ensure the name is correct in config"
+            )
+            continue
+        color = boat_status.color
+
+        trace = vessel_path_trace(boat, color=color)
         trace.name = name
         fig.add_trace(trace)
-        label = label_trace(group, color)
+        label = label_trace(boat, color)
         fig.add_trace(label)
     # Trace all aircraft
     for mmsi, group in aircraft.groupby("mmsi"):

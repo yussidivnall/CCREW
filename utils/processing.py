@@ -24,7 +24,7 @@ def fix_datetime_columns(df: pd.DataFrame, columns=["server_timestamp"]):
     return df
 
 
-def filter_mmsis(df: pd.DataFrame, mmsis: list):
+def filter_mmsis(df: pd.DataFrame, mmsis: list) -> pd.DataFrame:
     """Return only rows with 'mmsi' in mmsis"""
     mask = df["mmsi"].isin(mmsis)
     ret = df.loc[mask].copy()
@@ -53,16 +53,15 @@ def filter_time_intervals(group, min_interval):
             last_timestamp = t
     group = group.loc[mask]
 
-    print(group)
     return group
 
 
 def sieve_timedelta(
     df: pd.DataFrame, minimum_elapsed=timedelta(seconds=30)
 ) -> pd.DataFrame:
-    """Group by MMSI, for each vessel, only keep rows which are `minimum_elapsed` apart or more"""
+    """Group by MMSI, ship_name, for each vessel, only keep rows which are `minimum_elapsed` apart or more"""
     df = df.copy()
-    groups = df.groupby("mmsi")
+    groups = df.groupby(["mmsi", "ship_name"])
     sieved_groups = []
     for _, group in groups:
         timestamps = group["server_timestamp"]
@@ -111,7 +110,6 @@ def tracked_vessels(vessels: pd.DataFrame, tracking_vessels: list) -> pd.DataFra
     [{"mmsi":123, "label": "Label To Apply To Boat", "name": "Anything, not really used for nothing"}, ...]
     """
     mmsis = [vessel["mmsi"] for vessel in tracking_vessels]
-    print(mmsis)
     mask = vessels["mmsi"].isin(mmsis)
     ret = vessels.loc[mask].copy()
     return ret

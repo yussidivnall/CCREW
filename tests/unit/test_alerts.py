@@ -8,7 +8,14 @@ from alert.rules import AlertRule
 from dtypes import Status, BoatStatus, Region
 
 
-def test_initialised_statuses():
+@pytest.fixture
+def reset_alert():
+    alert.status = Status()
+    alert.status.boats = []
+    yield
+
+
+def test_initialised_statuses(reset_alert):
     # Empty tracked boat list
     alert.config.tracked_boats = []
     alert.initialise_statuses()
@@ -34,14 +41,12 @@ def test_initialised_statuses():
             speed=None,
             in_regions=None,
             home=None,
-            alerts=None,
+            alerts=[],
         ),
     ]
 
 
-def test_initialised_statuses_with_boat_empty_alert_rules():
-    # boat_alert = AlertRule(name="test rule", enable="speed > 10", disable="speed < 3")
-    alert.status = Status()
+def test_initialised_statuses_with_boat_empty_alert_rules(reset_alert):
     alert.config.tracked_boats = [
         {"mmsi": 1234, "name": "Shmulik", "color": "red", "alerts": []}
     ]
@@ -62,9 +67,7 @@ def test_initialised_statuses_with_boat_empty_alert_rules():
     ]
 
 
-def test_initialised_statuses_with_boat_alert_rules():
-    # boat_alert = AlertRule(name="test rule", enable="speed > 10", disable="speed < 3")
-    alert.status = Status()
+def test_initialised_statuses_with_boat_alert_rules(reset_alert):
     alert.config.tracked_boats = [
         {
             "mmsi": 1234,
@@ -90,10 +93,6 @@ def test_initialised_statuses_with_boat_alert_rules():
             alerts=[AlertRule(name="test_rule", enable="speed>10", disable="speed<3")],
         ),
     ]
-
-
-def test_update_boat_alerts():
-    pass
 
 
 # def mock_boats_df():
