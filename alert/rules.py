@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import logging
 from simpleeval import simple_eval
 
 
@@ -9,7 +10,11 @@ class AlertRule:
     disable: str
     raised: bool = False
 
-    def parse_boat_rules(self, names):
+    def evaluate(self, names):
+        print(f"evaluate with names:{names}")
+        if "speed" not in names or names["speed"] is None:
+            logging.warning("cannot evaluate missing boat speed")
+            return
         if simple_eval(self.enable, names=names):
             self.raised = True
         elif simple_eval(self.disable, names=names):

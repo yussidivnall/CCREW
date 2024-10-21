@@ -1,11 +1,13 @@
+import datetime
 from unittest.mock import Mock, patch
 
 import pandas as pd
-from pandas.core.api import DataFrame
 import pytest
+from pandas.core.api import DataFrame
+
 from alert import alert
 from alert.rules import AlertRule
-from dtypes import Status, BoatStatus, Region
+from dtypes import BoatStatus, Region, Status
 
 
 @pytest.fixture
@@ -93,6 +95,68 @@ def test_initialised_statuses_with_boat_alert_rules(reset_alert):
             alerts=[AlertRule(name="test_rule", enable="speed>10", disable="speed<3")],
         ),
     ]
+
+
+def test_update_statuses(reset_alert):
+    alert.config.tracked_boats = [
+        {
+            "mmsi": 1234,
+            "name": "Shmulik",
+            "color": "red",
+            "alerts": [
+                {"name": "test_rule", "enable": "speed>10", "disable": "speed<3"}
+            ],
+        }
+    ]
+
+    alert.boats_snapshot_df = pd.DataFrame(
+        {"mmsi": [1234], "ship_name": ["Shmulik     "], "sog": [11]}
+    )
+
+    alert.initialise_statuses()
+    alert.update_statuses()
+    assert alert.status.boats[0].speed == 11
+
+
+def test_boat_speeding_sets_monitor(reset_alert):
+    alert.config.tracked_boats = [
+        {
+            "mmsi": 1234,
+            "name": "Shmulik",
+            "color": "red",
+            "alerts": [
+                {"name": "test_rule", "enable": "speed>10", "disable": "speed<3"}
+            ],
+        }
+    ]
+
+    alert.boats_df = pd.DataFrame(
+        {
+            "server_timestamp": datetime.datetime.now(),
+            "mmsi": [1234],
+            "ship_name": ["Shmulik     "],
+            "sog": [11],
+            "lat": 51.006948333333334,
+            "lon": 1.6026500000000001,
+        }
+    )
+
+    alert.boats_snapshot_df = pd.DataFrame(
+        {
+            "server_timestamp": datetime.datetime.now(),
+            "mmsi": [1234],
+            "ship_name": ["Shmulik     "],
+            "sog": [11],
+        }
+    )
+
+    alert.aircraft_df = pd.DataFrame({"server_timestamp": [], "mmsi": []})
+
+    alert.initialise_statuses()
+    alert.update_statuses()
+    alert.set_monitor()
+
+    assert alert.status.monitor == True
 
 
 # def mock_boats_df():

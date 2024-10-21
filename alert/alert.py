@@ -77,46 +77,80 @@ def monitor_job():
     # pass
 
 
+def process_alert(alert: AlertRule, boat: BoatStatus):
+    """Process a single alert, consider moving this to boat"""
+    names = {"speed": boat.speed}
+    alert.evaluate(names)
+    return alert.raised
+
+
+def monitoring_enabled_message(boat_alerts, aircraft_present):
+    """Generate a monitoring message to dispatch
+
+    Get a list of boat alerts {"alert_messages":[strings]}
+    and a boolean indicating if an aircraft is present
+
+    Returns a string with the message
+    """
+    # ret = boat_alerts["alert_messages"].join("\n")
+    ret = "\n".join(boat_alerts["alert_messages"])
+    if aircraft_present:
+        ret += "\nAircraft present on scene"
+
+
 def tracked_boat_alerts():
+    """Iterate and evaluate all alerts in all boats in global status object
+
+    returns a dict with "raised": True and a list of alert names if any alert rule match
+    consider moving this to the status class
+
+    return {"raised": boolean, "alert_messages": ["strings"] }
+    """
     global status
     global boats_snapshot_df
+
+    ret = {"raised": False, "alert_messages": []}
     for boat in status.boats:
-        mmsi = boat.mmsi
+        if not boat.alerts:
+            continue
+
         for alert in boat.alerts:
-            pass
-    #
-    #    # for boat_status in status["
+            raised = process_alert(alert, boat)
+            if raised:
+                ret["raised"] = True
+                ret["alert_messages"].append(alert.name)
+    return ret
 
 
 def set_monitor():
     """Perform logic to enable and disable status.monitor
 
     any boat that has actions defined is raised return true
-    if aircraft active, set to True and return, otherwise False
+    if any S&R Aircraft in the scene enable
     """
     global status
     global boats_snapshot_df
     global aircraft_snapshot_df
 
-    tracked_boat_alerts()
-    # Any aircraft enables monitoring
-    if len(aircraft_snapshot_df) > 0:
-        if status.monitor == True:
-            # Aircraft present but already monitoring
+    boat_alerts = tracked_boat_alerts()
+    aircraft_on_scene = len(aircraft_snapshot_df) > 0
+
+    if boat_alerts["raised"] or aircraft_on_scene:
+        if status.monitor == True:  # Already monitoring
             return
-        else:
+        else:  # Enabling
             status.monitor = True
+            enable_message = monitoring_enabled_message(boat_alerts, aircraft_on_scene)
+
             filename = os.path.join(config.images_directory, "enabled.png")
             generate_map(filename)
-            dispatch_message("Aircraft pesent in scene, enabling monitoring", filename)
-            return
-
-    # No alerts
-    if status.monitor is False:
-        return
+            dispatch_message(enable_message, filename)
     else:
-        status.monitor = False
-        dispatch_message("Disabling monitoring")
+        if status.monitor == False:
+            return
+        else:
+            dispatch_message("Disabling monitoring")
+            return
 
 
 def update_statuses() -> None:
@@ -124,29 +158,42 @@ def update_statuses() -> None:
     global boats_snapshot_df
     for boat in status.boats:
         mmsi = boat.mmsi
-        row = boats_snapshot_df[boats_snapshot_df[mmsi] == mmsi]
-        pass
+        name = boat.name
+        query = f"mmsi == {mmsi} and ship_name.str.strip() == '{name}'"
+        rows = boats_snapshot_df.query(query)
+        if rows.empty:
+            logging.debug(f"boat {mmsi}-{name} not in snapshot")
+            continue
+        row = rows.iloc[0]
+        boat.speed = row["sog"]
 
 
 def initialise_statuses() -> None:
     # Load tracked boats from config and initialise
     global status
     for boat in config.tracked_boats:
-        mmsi = int(boat["mmsi"])
+        mmsi = boat["mmsi"]
+        if not isinstance(mmsi, int):
+            logging.error(
+                f"Boat mmsi is not an integer, fix config, not tracking {boat}"
+            )
+            continue
+
         name = str(boat["name"])
         color = str(boat["color"])
-        boat_status = BoatStatus(mmsi=mmsi, name=name, color=color)
+        boat_status = BoatStatus(mmsi=int(mmsi), name=name, color=color)
         if "alerts" in boat:
             alerts: list[AlertRule] = [AlertRule(**ar) for ar in boat["alerts"]]
             boat_status.alerts = alerts
         else:
             boat_status.alerts = []
-        logging.info("adding: {}", boat_status)
+        logging.info(f"adding: {boat_status}")
         status.boats.append(boat_status)
 
 
 def schedule_tasks():
     schedule.every(15).seconds.do(reload_dataframes)
+    schedule.every(15).seconds.do(update_statuses)
     schedule.every(30).seconds.do(set_monitor)
     schedule.every(900).seconds.do(monitor_job)  # should be every 15 minutes
 
