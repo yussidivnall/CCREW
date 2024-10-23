@@ -5,7 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.graph_objects import Figure, Scattergeo, Scattermapbox
 
-from dtypes import Status
+from alert.status import Status
 from utils import processing
 
 

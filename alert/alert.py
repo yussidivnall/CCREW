@@ -11,8 +11,8 @@ from discord_webhook import DiscordWebhook
 
 import config
 from alert.rules import AlertRule
-from dtypes import Status, BoatStatus, Region
-from utils import logic, plotting, processing
+from alert.status import Status, BoatStatus
+from utils import plotting, processing
 
 status = Status()
 boats_df: pd.DataFrame
@@ -43,6 +43,10 @@ def dump_status():
 def dispatch_message(message, image=None):
     # Post a message to discord
     logging.info(f"discord msg: {message}")
+    if not config.dispatch:
+        logging.warning("Not dispatching message, disabled in config")
+        return
+
     webhook = DiscordWebhook(url=config.discord_webhook_url, content=message)
     if image:
         with open(image, "rb") as f:

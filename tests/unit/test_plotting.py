@@ -1,6 +1,6 @@
 from datetime import datetime
 from unittest.mock import patch
-from dtypes import Status, BoatStatus
+from alert.status import Status, BoatStatus
 from utils import processing, plotting
 
 

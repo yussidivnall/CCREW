@@ -1,9 +1,5 @@
-from dataclasses import dataclass, field
-import logging
-from typing import TypedDict, Dict, Optional
 from datetime import datetime
-from typing_extensions import NotRequired
-from alert import rules
+from dataclasses import dataclass
 
 
 @dataclass
@@ -55,55 +51,3 @@ class AircraftPosition:
     time_stamp: int
     user_id: int
     valid: bool
-
-
-@dataclass
-class BoatStatus:
-    # Boats are indexed by mmsi+name,
-    mmsi: int
-    name: str
-    color: str
-    online: bool = False
-    lat: float | None = None
-    lon: float | None = None
-    speed: float | None = None
-    in_regions: list[str] | None = None
-    home: str | None = None
-    alerts: list[rules.AlertRule] | None = None
-
-
-@dataclass
-class AircraftStatus:
-    mmsi: int
-    name: str
-    lat: float
-    lon: float
-    speed: float
-    in_regions: list[str]
-    online: bool
-
-
-@dataclass
-class Status:
-    monitor: bool = False
-    boats: list[BoatStatus] = field(default_factory=list)
-    aircraft: list[AircraftStatus] = field(default_factory=list)
-
-    def get_boat(self, mmsi, ship_name):
-        """Returns a tracked boat"""
-        for boat in self.boats:
-            if boat.mmsi == mmsi and boat.name == ship_name:
-                return boat
-        logging.warning(f"No status for boat {mmsi} - {ship_name}")
-
-    def __init__(self, monitor=False, boats=[], aircraft=[]):
-        self.monitor = monitor
-        self.boats = boats
-        self.aircraft = aircraft
-
-
-@dataclass
-class Region:
-    lat: list[float]
-    lon: list[float]
-    name: str

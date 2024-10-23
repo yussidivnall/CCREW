@@ -1,7 +1,8 @@
 import json
 from utils import parsers
 from utils.logic import lists_to_pairs, boat_in_region
-from dtypes import Region, BoatPosition
+from dtypes import BoatPosition
+from alert.status import Region
 
 
 def test_lists_to_pairs():

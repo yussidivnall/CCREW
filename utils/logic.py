@@ -1,5 +1,6 @@
 from typing import List, Tuple
-from dtypes import BoatPosition, BoatStatus, Region
+from dtypes import BoatPosition
+from alert.status import Region
 
 from shapely import Point, Polygon
 

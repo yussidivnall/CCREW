@@ -5,9 +5,9 @@ import pandas as pd
 import pytest
 from pandas.core.api import DataFrame
 
-from alert import alert
+from alert import alert, status, rules
 from alert.rules import AlertRule
-from dtypes import BoatStatus, Region, Status
+from alert.status import BoatStatus, Status
 
 
 @pytest.fixture
