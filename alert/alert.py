@@ -96,6 +96,7 @@ def monitoring_enabled_message(boat_alerts, aircraft_present):
     ret = "\n".join(boat_alerts["alert_messages"])
     if aircraft_present:
         ret += "\nAircraft present on scene"
+    return ret
 
 
 def tracked_boat_alerts():
@@ -141,6 +142,7 @@ def set_monitor():
         else:  # Enabling
             status.monitor = True
             enable_message = monitoring_enabled_message(boat_alerts, aircraft_on_scene)
+            print(f"ENABLED MESSAGE: {enable_message}")
 
             filename = os.path.join(config.images_directory, "enabled.png")
             generate_map(filename)

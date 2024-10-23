@@ -7,35 +7,53 @@ These utilities monitors and alerts when potentially dangerous situations occurs
 
 Tools for a safer passage.
 
-## Using Docker
+## Requirements
 
-`cp config.py.example config.py`
-edit the config file,
-you will need a
-[discord_webhook_url](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
-AISStream [api_key](https://aisstream.io/documentation)
+
+- AISStream [api_key](https://aisstream.io/documentation)
+- Discord [webhook_url](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
 Two points on a map to define the arena
 A list of boats you would like to track
 
+## Configurations
+copy the example config to config.py `cp config.py.example config.py`.
+edit the `config.py` file with your favourite text editor and set the following required configurations
+
+- api_key - the AISStream api_key
+- discord_webhook_url - the discord URL
+- arena - the region of interest,   single bounding box defined as 
+    `arena = [[[51.385, 0.909], [50.678, 2.667]]]`
+- tracked boats in this format
 ````python
 tracked_boats = [
     {
         "mmsi": 1234,
-        "name": "Boat display name",
-        "color": "red"
+        "name": "EXACT BOAT NAME   ",
+        "label": "Some label",
+        "color": "red",
+        "alerts": [
+            {
+                "name": "Boat Moving",
+                "enable": "speed>=5",
+                "disable": "speed<5",
+            },
+        ]
     },
     ...
 ]
+```
+the "alerts" are optional, and define the condition under which monitoring should be enabled and disabled. currently only able to raise an alert based on a boat's speed
 
-```bash
-$docker build --label ccrew .
-docker volume create ccrew_data
-docker run --rm --name ccrew -d -v ccrew_data:/srv/app/data -p 8050:8050 ccrew
-````
 
-when you have all those
+## Using Docker
+Run using `$docker compose up`
+port 8050 should be opened for requests and accessible using postman, a browser, curl, etc
+## Endpoints
 
-## Deploy
+- `/health` - health endpoing for heartbeat
+- `/snapshot` - generate and post a snapshot image to discord
+
+    for example `curl localhost:8050/health`
 
 ## Setup
 
@@ -52,6 +70,8 @@ Copy over `config.py.example` to `config.py`
 ```sh
 cp config.py.example config.py
 ```
+
+
 
 In order to monitor maritime traffic, you need to get an [API key](https://aisstream.io/) for the AISTream service.
 One you have it, edit the file `config.py` using your text editor of choice which is vi to change the line `api_key = "Your AISStream API key"`

@@ -6,8 +6,8 @@ from simpleeval import simple_eval
 @dataclass
 class AlertRule:
     name: str
-    enable: str
-    disable: str
+    enable: str  # condition to enable
+    disable: str  # condition to disable
     raised: bool = False
 
     def evaluate(self, names):
@@ -16,6 +16,7 @@ class AlertRule:
             logging.warning("cannot evaluate missing boat speed")
             return
         if simple_eval(self.enable, names=names):
+            print(f"Enabling alert for rule: {self.name}")
             self.raised = True
         elif simple_eval(self.disable, names=names):
             self.raised = False
