@@ -22,6 +22,13 @@ tracked_boats = [
         "name": "Boat name",
         "label": "Label",
         "color": "red"
+        "alerts": [ # Optional
+            {
+                "name": "Boat Moving",
+                "enable": "speed>=5",
+                "disable": "speed<5",
+            }
+        ],
     },
 ]
 # Define regions for alerting
