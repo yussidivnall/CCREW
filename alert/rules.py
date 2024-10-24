@@ -11,14 +11,15 @@ class AlertRule:
     raised: bool = False
 
     def evaluate(self, names):
-        print(f"evaluate with names:{names}")
+        logging.debug(f"Evaluating rule {self.name} with {names}")
         if "speed" not in names or names["speed"] is None:
-            logging.warning("cannot evaluate missing boat speed")
+            logging.debug("cannot evaluate missing boat speed")
             return
         if simple_eval(self.enable, names=names):
-            print(f"Enabling alert for rule: {self.name}")
+            logging.info(f"Enabling alert for rule: {self.name}")
             self.raised = True
         elif simple_eval(self.disable, names=names):
+            logging.info(f"Disabling alert for rule: {self.name}")
             self.raised = False
 
     def __init__(self, name, enable, disable):

@@ -15,8 +15,6 @@ def get_tracked_traces(df: pd.DataFrame, tracked: list) -> list:
     for vessel in tracked:
         mmsi = vessel["mmsi"]
         name = vessel["name"]
-        # color = vessel["color"]
-        # print(color)
         vessel_df = df[df["mmsi"] == mmsi]
         trace = Scattermapbox(
             lon=vessel_df["lon"],
@@ -122,7 +120,6 @@ def label_trace(group: pd.DataFrame, color="gray", text=None):
 
 
 def vessel_path_trace(group, symbol="circle", color="gray"):
-    print(group["ship_name"])
     ret = go.Scattermapbox(
         lat=group["lat"],
         lon=group["lon"],
@@ -189,8 +186,6 @@ def plot_scene(
     tracked_boats = processing.filter_mmsis(boats, tracked_boats_mmsis)
     tracked_boats = processing.sieve_timedelta(tracked_boats, timedelta(seconds=60))
     for idx, boat in tracked_boats.groupby(["mmsi", "ship_name"]):
-        print(idx)
-        print()
         mmsi = int(idx[0])
         name = str(idx[1]).strip()
         boat_status = status.get_boat(mmsi, name)

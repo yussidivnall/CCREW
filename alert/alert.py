@@ -45,6 +45,7 @@ def dispatch_message(message, image=None):
     logging.info(f"discord msg: {message}")
     if not config.dispatch:
         logging.warning("Not dispatching message, disabled in config")
+        logging.warning(message)
         return
 
     webhook = DiscordWebhook(url=config.discord_webhook_url, content=message)
@@ -146,8 +147,6 @@ def set_monitor():
         else:  # Enabling
             status.monitor = True
             enable_message = monitoring_enabled_message(boat_alerts, aircraft_on_scene)
-            print(f"ENABLED MESSAGE: {enable_message}")
-
             filename = os.path.join(config.images_directory, "enabled.png")
             generate_map(filename)
             dispatch_message(enable_message, filename)
@@ -187,7 +186,7 @@ def initialise_statuses() -> None:
 
         name = str(boat["name"])
         color = str(boat["color"])
-        boat_status = BoatStatus(mmsi=int(mmsi), name=name, color=color)
+        boat_status = BoatStatus(mmsi=mmsi, name=name, color=color)
         if "alerts" in boat:
             alerts: list[AlertRule] = [AlertRule(**ar) for ar in boat["alerts"]]
             boat_status.alerts = alerts

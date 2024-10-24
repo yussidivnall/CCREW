@@ -42,6 +42,11 @@ def create_app(config_name=None):
         app (Flask): The Flask app instance.
     """
     app = Flask(__name__)
+    if app.debug:
+        app.logger.setLevel(logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        app.logger.setLevel(logging.WARNING)
 
     # Only start background jobs once in the main thread (debug starts it twice)
     if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":

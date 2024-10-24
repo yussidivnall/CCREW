@@ -16,6 +16,7 @@ from utils.parsers import parse_position_report, parse_sar_aircraft_report
 # Holds a state for each vessels, indexed by mmsi
 # e.g state["boats"]["mmsi"] = boat: BoatPosition
 # e.g state["aircraft"]["mmsi"] = aircraft: AircraftPosition
+# TODO: pretty sure this needs to be a status (alert.status.Status) object
 state = {
     "last_updated": None,
     "boats": {},
@@ -43,7 +44,6 @@ def update_check(state: dict, entry: AircraftPosition | BoatPosition) -> bool:
     state: a dictionary to check entry against (boats or aircraft)
     entry: entry to check against
     """
-
     mmsi = entry["mmsi"]
     timestamp = entry["server_timestamp"]
     if config.record_all:
