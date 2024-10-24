@@ -3,7 +3,7 @@ import json
 import logging
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 
 import pandas as pd
 import schedule
@@ -75,7 +75,7 @@ def monitor_job():
 
     filename = os.path.join(config.images_directory, "monitoring.png")
     generate_map(filename)
-    message = f"{datetime.now()} - Monitoring"
+    message = f"Monitoring:\n {datetime.now(timezone.utc)} \n{status.messages}"
     dispatch_message(message, filename)
 
     # fig.show()
@@ -141,12 +141,18 @@ def set_monitor():
     boat_alerts = tracked_boat_alerts()
     aircraft_on_scene = len(aircraft_snapshot_df) > 0
 
+    status.messages = boat_alerts["alert_messages"]
+    if aircraft_on_scene:
+        status.messages.append("S&R Aircraft on scene")
+
     if boat_alerts["raised"] or aircraft_on_scene:
         if status.monitor == True:  # Already monitoring
             return
         else:  # Enabling
             status.monitor = True
-            enable_message = monitoring_enabled_message(boat_alerts, aircraft_on_scene)
+            enable_message = (
+                f"Enabling monitor:\n {datetime.now(timezone.utc)} \n{status.messages}"
+            )
             filename = os.path.join(config.images_directory, "enabled.png")
             generate_map(filename)
             dispatch_message(enable_message, filename)
@@ -215,9 +221,6 @@ async def run():
 def main():
     reload_dataframes()
     initialise_statuses()
-    schedule.every(15).seconds.do(reload_dataframes)
-    schedule.every(30).seconds.do(set_monitor)
-    schedule.every(900).seconds.do(monitor_job)  # should be every 15 minutes
     logging.info("Monitoring")
     while True:
         schedule.run_pending()
