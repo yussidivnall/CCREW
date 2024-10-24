@@ -150,7 +150,9 @@ def test_boat_speeding_sets_monitor(reset_alert):
         }
     )
 
-    alert.aircraft_df = pd.DataFrame({"server_timestamp": [], "mmsi": []})
+    alert.aircraft_df = pd.DataFrame(
+        {"server_timestamp": [], "mmsi": [], "ship_name": []}
+    )
 
     alert.initialise_statuses()
     alert.update_statuses()

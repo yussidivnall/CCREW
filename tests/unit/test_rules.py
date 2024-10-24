@@ -14,15 +14,15 @@ def test_boat_speeding():
 
     # Alert raised
     names = {"speed": 50}
-    alert_rule.parse_boat_rules(names)
+    alert_rule.evaluate(names)
     assert alert_rule.raised
 
     # Alert unchanged
     names = {"speed": 7.5}
-    alert_rule.parse_boat_rules(names)
+    alert_rule.evaluate(names)
     assert alert_rule.raised
 
     # Alert disabled
     names = {"speed": 4}
-    alert_rule.parse_boat_rules(names)
+    alert_rule.evaluate(names)
     assert not alert_rule.raised

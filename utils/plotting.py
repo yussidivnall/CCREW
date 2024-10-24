@@ -202,9 +202,9 @@ def plot_scene(
         label = label_trace(boat, color)
         fig.add_trace(label)
     # Trace all aircraft
-    for mmsi, group in aircraft.groupby(["mmsi", "ship_name"]):
+    for (mmsi, ship_name), group in aircraft.groupby(["mmsi", "ship_name"]):
         trace = vessel_path_trace(group, symbol="triangle")
-        name = f"Aircraft {mmsi}"
+        name = f"Aircraft {mmsi} - {ship_name}"
         trace.name = name
         fig.add_trace(trace)
         label = label_trace(group, text=name)
