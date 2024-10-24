@@ -124,7 +124,7 @@ def tracked_boat_alerts():
             raised = process_alert(alert, boat)
             if raised:
                 ret["raised"] = True
-                ret["alert_messages"].append(alert.name)
+                ret["alert_messages"].append(f"{boat.name}-{boat.mmsi}: {alert.name}")
     return ret
 
 
