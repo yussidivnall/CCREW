@@ -84,7 +84,8 @@ def monitor_job():
 
 def process_alert(alert: AlertRule, boat: BoatStatus):
     """Process a single alert, consider moving this to boat"""
-    names = {"speed": boat.speed}
+    # names = {"speed": boat.speed}
+    names = boat
     alert.evaluate(names)
     return alert.raised
 
@@ -124,7 +125,9 @@ def tracked_boat_alerts():
             raised = process_alert(alert, boat)
             if raised:
                 ret["raised"] = True
-                ret["alert_messages"].append(f"{boat.name}-{boat.mmsi}: {alert.name}")
+                ret["alert_messages"].append(
+                    f"{boat.name}-{boat.mmsi}: {alert.message}"
+                )
     return ret
 
 

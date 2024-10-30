@@ -8,6 +8,7 @@ class AlertRule:
     name: str
     enable: str  # condition to enable
     disable: str  # condition to disable
+    message: str
     raised: bool = False
 
     def evaluate(self, names):
@@ -22,7 +23,12 @@ class AlertRule:
             logging.info(f"Disabling alert for rule: {self.name}")
             self.raised = False
 
-    def __init__(self, name, enable, disable):
+    def __init__(self, name, enable, disable, message=None):
         self.name = name
         self.enable = enable
         self.disable = disable
+
+        if not message:
+            self.message = name
+        else:
+            self.message = message

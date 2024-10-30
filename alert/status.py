@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 import logging
 from dataclasses import dataclass
 import logging
@@ -18,6 +18,9 @@ class BoatStatus:
     in_regions: list[str] | None = None
     home: str | None = None
     alerts: list[AlertRule] | None = None
+
+    def dict(self):
+        return {k: str(v) for k, v in asdict(self).items()}
 
 
 @dataclass
