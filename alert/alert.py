@@ -161,6 +161,7 @@ def set_monitor():
             return
         else:
             dispatch_message("Disabling monitoring")
+            status.monitor = False
             return
 
 
