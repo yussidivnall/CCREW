@@ -17,11 +17,16 @@ class AlertRule:
             logging.debug("cannot evaluate missing boat speed")
             return
         if simple_eval(self.enable, names=names):
-            logging.info(f"Enabling alert for rule: {self.name}")
+            msg = self.get_message(names)
+            logging.info(f"Enabling alert rule: {self.name}, - {msg}")
             self.raised = True
         elif simple_eval(self.disable, names=names):
             logging.info(f"Disabling alert for rule: {self.name}")
             self.raised = False
+
+    def get_message(self, names):
+        ret = self.message.format(**names)
+        return ret
 
     def __init__(self, name, enable, disable, message=None):
         self.name = name

@@ -22,8 +22,6 @@ def test_initialised_statuses(reset_alert):
     alert.config.tracked_boats = []
     alert.initialise_statuses()
     assert alert.status.boats == []
-
-    # tracked boat list missing keys
     alert.config.tracked_boats = [{}]
     with pytest.raises(KeyError) as kerr:
         alert.initialise_statuses()
@@ -116,6 +114,18 @@ def test_update_statuses(reset_alert):
     alert.initialise_statuses()
     alert.update_statuses()
     assert alert.status.boats[0].speed == 11
+
+
+def test_process_alert(reset_alert):
+
+    bs = {
+        "mmsi": 1234,
+        "name": "Shmulik",
+        "color": "red",
+        "alerts": [{"name": "test_rule", "enable": "speed>10", "disable": "speed<3"}],
+    }
+    boat_status = BoatStatus(**bs)
+    assert False
 
 
 def test_boat_speeding_sets_monitor(reset_alert):

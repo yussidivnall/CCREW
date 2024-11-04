@@ -85,7 +85,7 @@ def monitor_job():
 def process_alert(alert: AlertRule, boat: BoatStatus):
     """Process a single alert, consider moving this to boat"""
     # names = {"speed": boat.speed}
-    names = boat
+    names = boat.get_names()
     alert.evaluate(names)
     return alert.raised
 
@@ -108,7 +108,7 @@ def monitoring_enabled_message(boat_alerts, aircraft_present):
 def tracked_boat_alerts():
     """Iterate and evaluate all alerts in all boats in global status object
 
-    returns a dict with "raised": True and a list of alert names if any alert rule match
+    returns a dict with "raised": True and a list of alert messages if any alert rule match
     consider moving this to the status class
 
     return {"raised": boolean, "alert_messages": ["strings"] }
@@ -125,9 +125,8 @@ def tracked_boat_alerts():
             raised = process_alert(alert, boat)
             if raised:
                 ret["raised"] = True
-                ret["alert_messages"].append(
-                    f"{boat.name}-{boat.mmsi}: {alert.message}"
-                )
+                msg = alert.get_message(boat.get_names())
+                ret["alert_messages"].append(f"{boat.name}-{boat.mmsi}: {msg}")
     return ret
 
 

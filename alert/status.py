@@ -22,6 +22,14 @@ class BoatStatus:
     def dict(self):
         return {k: str(v) for k, v in asdict(self).items()}
 
+    def get_names(self):
+        ret = {
+            "mmsi": self.mmsi,
+            "name": self.name,
+            "speed": self.speed,
+        }
+        return ret
+
 
 @dataclass
 class AircraftStatus:
