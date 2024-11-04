@@ -84,7 +84,6 @@ def monitor_job():
 
 def process_alert(alert: AlertRule, boat: BoatStatus):
     """Process a single alert, consider moving this to boat"""
-    # names = {"speed": boat.speed}
     names = boat.get_names()
     alert.evaluate(names)
     return alert.raised

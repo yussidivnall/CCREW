@@ -23,6 +23,7 @@ class BoatStatus:
         return {k: str(v) for k, v in asdict(self).items()}
 
     def get_names(self):
+        """get names, used for simpleeval and injecting values into alert message"""
         ret = {
             "mmsi": self.mmsi,
             "name": self.name,
