@@ -27,6 +27,7 @@ tracked_boats = [
                 "name": "Boat Moving",
                 "enable": "speed>=5",
                 "disable": "speed<5",
+                "message": "vessel {name} is travelling at {speed}",
             }
         ],
     },

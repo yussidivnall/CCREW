@@ -36,13 +36,18 @@ tracked_boats = [
                 "name": "Boat Moving",
                 "enable": "speed>=5",
                 "disable": "speed<5",
+                "message": "vessel {name} is travelling at {speed}",
             },
         ]
     },
     ...
 ]
 ```
-the "alerts" are optional, and define the condition under which monitoring should be enabled and disabled. currently only able to raise an alert based on a boat's speed
+the "alerts" are optional, and define the condition under which monitoring should be "enabled" and "disabled". currently only able to raise an alert based on a boat's "{speed}", "{name}" and "{mssi}". "message" is optional, if missing will use "name" instead.
+
+
+**Note** "enable" and "disable" are evaluated by [simpleeval](https://pypi.org/project/simpleeval/) and so do not require `{` and `}` whereas "message" is evaluated as a python formatted python string and so do.
+
 
 
 ## Using Docker
